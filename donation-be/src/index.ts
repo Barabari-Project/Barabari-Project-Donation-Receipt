@@ -96,9 +96,7 @@ app.get('/image/:id', (req, res) => {
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.status(500).send(err.message);
 });
-app.get('*', (req, res) => {
-    console.log('what is going on');
-});
+
 // Start the server
 const server = app.listen(PORT, () => {
     console.log("Server is listening on port " + PORT);
