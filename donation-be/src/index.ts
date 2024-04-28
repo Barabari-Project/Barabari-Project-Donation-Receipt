@@ -65,7 +65,7 @@ app.post("/abc", async (req: Request, res: Response) => {
             // If password doesn't match, throw an error
             throw new Error('Invalid Credentials');
         }
-    } catch (error) {
+    } catch (error:any) {
         // Catch any errors and send an error response
         return res.status(500).json({ error: error.message });
     }
@@ -75,17 +75,17 @@ app.post("/abc", async (req: Request, res: Response) => {
 app.get('/image/:id', (req, res) => {
     // Serve different images based on ID
     if (imageDecryption(req.params.id) === 1) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url, 'image1.png')}`);
+        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image1.png')}`);
     } else if (imageDecryption(req.params.id) === 2) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url, ',mage2.png')}`);
+        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, ',mage2.png')}`);
     } else if (imageDecryption(req.params.id) === 3) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url + 'image3.png')}`);
+        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image3.png')}`);
     } else if (imageDecryption(req.params.id) === 4) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url, 'image4.png')}`);
+        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image4.png')}`);
     } else if (imageDecryption(req.params.id) === 5) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url, 'image5.png')}`);
+        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image5.png')}`);
     } else if (imageDecryption(req.params.id) === 6) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url, 'image6.png')}`);
+        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image6.png')}`);
     } else {
         res.status(404).send('Image not found');
     }

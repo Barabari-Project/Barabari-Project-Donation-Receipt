@@ -15,7 +15,7 @@ dotenv.config(); // Load environment variables from .env file
 const RESPONSES_SHEET_ID: string = process.env.RESPONSES_SHEET_ID!;
 
 // Credentials for the service account
-const CREDENTIALS: { private_key: string } = JSON.parse(fs.readFileSync(`${path.join(__dirname,process.env.service_cred)}`, 'utf8'));
+const CREDENTIALS: { private_key: string } = JSON.parse(fs.readFileSync(`${path.join(__dirname,process.env.service_cred!)}`, 'utf8'));
 
 const serviceAccountAuth = new JWT({
     email: process.env.client_email,
