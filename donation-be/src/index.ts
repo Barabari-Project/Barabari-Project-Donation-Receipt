@@ -29,7 +29,7 @@ app.use(express.json()); // Enable JSON parsing middleware
 
 // Enable CORS with specific origin
 app.use(cors({
-    origin: process.env.FRONTEND_BASE_URI
+    origin: 'https://donation-project-ugy6.onrender.com'
 }));
 
 // Set up morgan middleware for logging
