@@ -49,7 +49,7 @@ app.post("/abc", async (req, res) => {
         // Check if the provided password matches the one from environment variables
         if (password === process.env.PASSWORD) {
             // Render the EJS template with the provided data
-            const html = await ejs.renderFile(path.join(__dirname, '../../content.ejs'), { data, images });
+            const html = await ejs.renderFile(path.join(__dirname, process.env.CONTENT_PATH), { data, images });
             // Send the rendered HTML as response
             return res.status(200).send(html);
         }
@@ -66,11 +66,12 @@ app.post("/abc", async (req, res) => {
 // Route for serving images based on ID
 app.get('/image/:id', (req, res) => {
     // Serve different images based on ID
+    console.log('this funciton is invoked');
     if (imageDecryption(req.params.id) === 1) {
         res.sendFile(`${path.join(__dirname, process.env.image_dir_url, 'image1.png')}`);
     }
     else if (imageDecryption(req.params.id) === 2) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url, ',mage2.png')}`);
+        res.sendFile(`${path.join(__dirname, process.env.image_dir_url, 'image2.png')}`);
     }
     else if (imageDecryption(req.params.id) === 3) {
         res.sendFile(`${path.join(__dirname, process.env.image_dir_url, 'image3.png')}`);
@@ -87,6 +88,9 @@ app.get('/image/:id', (req, res) => {
     else {
         res.status(404).send('Image not found');
     }
+});
+app.get('*', (req, res) => {
+    console.log('what is going on');
 });
 // Error handling middleware
 app.use((err, req, res, next) => {

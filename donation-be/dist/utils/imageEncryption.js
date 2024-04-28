@@ -5,6 +5,7 @@ dotenv.config(); // Load environment variables from .env file
 const secretKey = process.env.IMAGE_SECRET_KEY;
 // Function to encrypt the number
 const imageEncryption = (i) => {
+    // return i;
     const dataObj = { key: i }; // Create an object with the number
     const objStr = JSON.stringify(dataObj); // Convert object to JSON string
     const encryptedObj = CryptoJS.AES.encrypt(objStr, secretKey).toString(); // Encrypt JSON string

@@ -1,15 +1,14 @@
 import { createTransport } from "nodemailer";
+import ejs from 'ejs';
 import dotenv from 'dotenv';
 import path from 'path';
+import pdf from 'html-pdf';
 import puppeteer from 'puppeteer';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import imageEncryption from "../utils/imageEncryption.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config(); // Load environment variables from .env file
-import pdf from 'html-pdf';
-
-
 export const sendMail = async (rowData) => {
     // Extract email ID from row data
     const mailId = rowData.Email;
@@ -24,11 +23,17 @@ export const sendMail = async (rowData) => {
         await page.setRequestInterception(true);
         const images = {};
         for (let i = 1; i <= 6; i++) {
-            images[i.toString()] = `image/${imageEncryption(i)}`;
+            images[i.toString()] = `http://localhost:3000/image/${imageEncryption(i)}`;
         }
-        const html = await ejs.renderFile(path.join(__dirname, process.env.CONTENT_PATH), { data, images });
+        console.log('we are here');
+        const html = await ejs.renderFile(path.join(__dirname, process.env.CONTENT_PATH), { data: rowData, images });
+        pdf.create(html).toFile(path.join(__dirname, process.env.PDF_PATH), (err, res) => {
+            if (err)
+                return console.log(err);
+            console.log('PDF generated successfully:', res);
+        });
         // Intercept requests and modify as needed
-        // page.on("request", async (interceptedRequest) => {
+        // page.on("request", async interceptedRequest => {
         //     if (interceptedRequest.url().includes('/abc')) {
         //         // Intercept the request to '/abc' and continue with custom data
         //         await interceptedRequest.continue({
@@ -36,8 +41,7 @@ export const sendMail = async (rowData) => {
         //             postData: JSON.stringify({ data: rowData, password: process.env.PASSWORD, images }),
         //             headers: { "Content-Type": "application/json" },
         //         });
-        //     }
-        //     else {
+        //     } else {
         //         // Continue other requests as normal
         //         await interceptedRequest.continue();
         //     }
@@ -47,17 +51,11 @@ export const sendMail = async (rowData) => {
         //     waitUntil: "networkidle2"
         // });
         // await page.pdf({
-        //     path: path.join(__dirname, '../../PDF/123.pdf'),
+        //     path: path.join(__dirname, process.env.PDF_PATH),
         //     format: 'A4'
         // });
         // // Close the browser after navigation
         // await browser.close();
-
-        pdf.create(htmlContent).toFile(path.join(__dirname, '../../PDF/123.pdf'), (err, res) => {
-            if (err) return console.log(err);
-            console.log('PDF generated successfully:', res);
-        });
-
         // Now, you can send an email after navigating to the endpoint and intercepting the request
         // Create a transporter using Gmail service
         const transporter = createTransport({
@@ -74,10 +72,10 @@ export const sendMail = async (rowData) => {
             subject: "Invoice",
             html: `Hey ${rowData.Name}, Please find the invoice attached.`,
             attachments: [{
-                filename: "invoice.pdf",
-                path: path.join(__dirname, '../../PDF/123.pdf'),
-                contentType: 'application/pdf'
-            }]
+                    filename: "invoice.pdf",
+                    path: path.join(__dirname, process.env.PDF_PATH),
+                    contentType: 'application/pdf'
+                }]
         };
         // Send email with PDF attachment
         const info = await transporter.sendMail(mailOptions);
