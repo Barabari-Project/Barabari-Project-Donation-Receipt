@@ -5,9 +5,9 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "start": "nodemon --watch src/** --ext ts,json --ignore src/**/*.spec.ts --exec tsx src/index.ts",
+    "dev": "nodemon --watch src/** --ext ts,json --ignore src/**/*.spec.ts --exec tsx src/index.ts",
     "build": "tsc",
-    "serve": "node dist/index.js"
+    "start": "node dist/src/index.js"
   },
   "keywords": [],
   "author": "",

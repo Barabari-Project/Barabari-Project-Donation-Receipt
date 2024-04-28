@@ -4,19 +4,14 @@ import { JWT } from 'google-auth-library';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import { sendMail } from './sendMail.js'; // Import the sendMail function
-import { RowData } from './interfaces.js'; // Import the RowData interface
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
 dotenv.config(); // Load environment variables from .env file
-
 // Spreadsheet key is the long ID in the sheets URL
-const RESPONSES_SHEET_ID: string = process.env.RESPONSES_SHEET_ID!;
-
+const RESPONSES_SHEET_ID = process.env.RESPONSES_SHEET_ID;
 // Credentials for the service account
-const CREDENTIALS: { private_key: string } = JSON.parse(fs.readFileSync(`${path.join(__dirname,process.env.service_cred!)}`, 'utf8'));
-
+const CREDENTIALS = JSON.parse(fs.readFileSync(`${path.join(__dirname, process.env.service_cred)}`, 'utf8'));
 const serviceAccountAuth = new JWT({
     email: process.env.client_email,
     key: CREDENTIALS.private_key,
@@ -24,30 +19,25 @@ const serviceAccountAuth = new JWT({
         'https://www.googleapis.com/auth/spreadsheets',
     ],
 });
-
 // Create a new GoogleSpreadsheet instance
 const doc = new GoogleSpreadsheet(RESPONSES_SHEET_ID, serviceAccountAuth);
-
 // Function to get and process rows from the spreadsheet and send email
-export const readDataAndSendMail = async (startingRowNo: number, endingRowNo: number): Promise<void> => {
+export const readDataAndSendMail = async (startingRowNo, endingRowNo) => {
     try {
         startingRowNo -= 2; // Adjust index to account for header rows
         endingRowNo -= 2; // Adjust index to account for header rows
         // Load the document info
         await doc.loadInfo();
-
         // Get the first sheet
         let sheet = doc.sheetsByIndex[0];
-
         // Get all the rows
         let rows = await sheet.getRows();
-
         // Loop through each row
         for (let index = startingRowNo; index <= endingRowNo; index++) {
             const row = rows[index];
             if (row) {
                 // Extract necessary data from the row
-                const data: RowData = {
+                const data = {
                     "Receipt No": row.get('Receipt No'), // Assuming 'Receipt No' is a column in the sheet
                     "Today’s Date": row.get('Today’s Date'),
                     "Name": row.get('Name:'),
@@ -64,8 +54,10 @@ export const readDataAndSendMail = async (startingRowNo: number, endingRowNo: nu
                 await sendMail(data);
             }
         }
-    } catch (error) {
-        console.log(error)
+    }
+    catch (error) {
+        console.log(error);
         throw error;
     }
 };
+//# sourceMappingURL=readDataAndSendMail.js.map
