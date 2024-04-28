@@ -65,7 +65,7 @@ app.post("/abc", async (req: Request, res: Response) => {
             // If password doesn't match, throw an error
             throw new Error('Invalid Credentials');
         }
-    } catch (error:any) {
+    } catch (error: any) {
         // Catch any errors and send an error response
         return res.status(500).json({ error: error.message });
     }
@@ -91,14 +91,14 @@ app.get('/image/:id', (req, res) => {
         res.status(404).send('Image not found');
     }
 });
-app.get('*',(req,res)=>{
-    console.log('what is going on');
-})
+
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.status(500).send(err.message);
 });
-
+app.get('*', (req, res) => {
+    console.log('what is going on');
+});
 // Start the server
 const server = app.listen(PORT, () => {
     console.log("Server is listening on port " + PORT);
