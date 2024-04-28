@@ -31,6 +31,7 @@ const App: React.FC = () => {
         alert('internal Server Error');
         // Handle error
         console.error('Error:', error);
+        console.error(error!.message);
       } finally {
         setIsLoading(false);
       }

@@ -7,6 +7,8 @@ const secretKey: string = process.env.IMAGE_SECRET_KEY!;
 
 // Function to decrypt the encrypted value and return the original number
 const imageDecryption = (encryptedValue: string): number => {
+    console.log(encryptedValue);
+    return parseInt(encryptedValue);
     const bytes = CryptoJS.AES.decrypt(encryptedValue, secretKey); // Decrypt the encrypted value
     const decryptedString = bytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to string
     const decryptedObj = JSON.parse(decryptedString); // Parse the decrypted string to object

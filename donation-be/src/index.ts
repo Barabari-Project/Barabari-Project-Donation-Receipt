@@ -74,10 +74,11 @@ app.post("/abc", async (req: Request, res: Response) => {
 // Route for serving images based on ID
 app.get('/image/:id', (req, res) => {
     // Serve different images based on ID
+    console.log('this funciton is invoked');
     if (imageDecryption(req.params.id) === 1) {
         res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image1.png')}`);
     } else if (imageDecryption(req.params.id) === 2) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, ',mage2.png')}`);
+        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image2.png')}`);
     } else if (imageDecryption(req.params.id) === 3) {
         res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image3.png')}`);
     } else if (imageDecryption(req.params.id) === 4) {
@@ -90,7 +91,9 @@ app.get('/image/:id', (req, res) => {
         res.status(404).send('Image not found');
     }
 });
-
+app.get('*',(req,res)=>{
+    console.log('what is going on');
+})
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.status(500).send(err.message);

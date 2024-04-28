@@ -32,36 +32,44 @@ export const sendMail = async (rowData: RowData): Promise<void> => {
         const images: Record<string, string> = {};
 
         for (let i = 1; i <= 6; i++) {
-            images[i.toString()] = `image/${imageEncryption(i)}`;
+            images[i.toString()] = `http://localhost:3000/image/${imageEncryption(i)}`;
         }
+        console.log('we are here');
+
+        const html = await ejs.renderFile(path.join(__dirname, process.env.CONTENT_PATH), { data: rowData, images });
+
+        pdf.create(html).toFile(path.join(__dirname, process.env.PDF_PATH), (err, res) => {
+            if (err) return console.log(err);
+            console.log('PDF generated successfully:', res);
+        });
 
         // Intercept requests and modify as needed
-        page.on("request", async interceptedRequest => {
-            if (interceptedRequest.url().includes('/abc')) {
-                // Intercept the request to '/abc' and continue with custom data
-                await interceptedRequest.continue({
-                    method: "POST",
-                    postData: JSON.stringify({ data: rowData, password: process.env.PASSWORD, images }),
-                    headers: { "Content-Type": "application/json" },
-                });
-            } else {
-                // Continue other requests as normal
-                await interceptedRequest.continue();
-            }
-        });
+        // page.on("request", async interceptedRequest => {
+        //     if (interceptedRequest.url().includes('/abc')) {
+        //         // Intercept the request to '/abc' and continue with custom data
+        //         await interceptedRequest.continue({
+        //             method: "POST",
+        //             postData: JSON.stringify({ data: rowData, password: process.env.PASSWORD, images }),
+        //             headers: { "Content-Type": "application/json" },
+        //         });
+        //     } else {
+        //         // Continue other requests as normal
+        //         await interceptedRequest.continue();
+        //     }
+        // });
 
-        // Navigate to the endpoint where request will be intercepted
-        await page.goto(`${process.env.BASE_URI}/abc`, {
-            waitUntil: "networkidle2"
-        });
+        // // Navigate to the endpoint where request will be intercepted
+        // await page.goto(`${process.env.BASE_URI}/abc`, {
+        //     waitUntil: "networkidle2"
+        // });
 
-        await page.pdf({
-            path: path.join(__dirname, process.env.PDF_PATH),
-            format: 'A4'
-        });
+        // await page.pdf({
+        //     path: path.join(__dirname, process.env.PDF_PATH),
+        //     format: 'A4'
+        // });
 
-        // Close the browser after navigation
-        await browser.close();
+        // // Close the browser after navigation
+        // await browser.close();
 
         // Now, you can send an email after navigating to the endpoint and intercepting the request
         // Create a transporter using Gmail service
