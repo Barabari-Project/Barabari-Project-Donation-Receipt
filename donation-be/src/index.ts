@@ -9,13 +9,12 @@ import path, { dirname } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 import decryptData from '../utils/decryptData.js';
-import imageDecryption from '../utils/imageDecryption.js';
 import { readDataAndSendMail } from './readDataAndSendMail.js';
 
 dotenv.config(); // Load environment variables from .env file
 
 // Check if all required environment variables are present
-const requiredEnvVariables = ['PORT', 'RESPONSES_SHEET_ID', 'EMAIL_USER', 'EMAIL_PASS', 'ENV', 'CRYPTO_SECRET_KEY', 'PASSWORD', 'BASE_URI', 'FRONTEND_BASE_URI', 'client_email', 'IMAGE_SECRET_KEY', 'service_cred', 'image_dir_url'];
+const requiredEnvVariables = ['PORT', 'RESPONSES_SHEET_ID', 'EMAIL_USER', 'EMAIL_PASS', 'ENV', 'CRYPTO_SECRET_KEY', 'PASSWORD', 'BASE_URI', 'FRONTEND_BASE_URI', 'client_email', 'service_cred'];
 
 const missingEnvVariables = requiredEnvVariables.filter(variable => !process.env[variable]);
 if (missingEnvVariables.length > 0) {
@@ -29,7 +28,7 @@ app.use(express.json()); // Enable JSON parsing middleware
 
 // Enable CORS with specific origin
 app.use(cors({
-    origin: 'https://donation-project-ugy6.onrender.com'
+    origin: process.env.FRONTEND_BASE_URI
 }));
 
 // Set up morgan middleware for logging
@@ -47,48 +46,6 @@ app.post('/', async (req: Request, res: Response, next: NextFunction) => {
         }
     } else {
         throw new Error('Invalid Credentials');
-    }
-});
-
-// Route for handling POST requests to "/abc" endpoint
-app.post("/abc", async (req: Request, res: Response) => {
-    try {
-        // Destructure the request body to get RowData and password
-        const { data, password, images }: { data: RowData, password: string, images: Record<string, string> } = req.body;
-        // Check if the provided password matches the one from environment variables
-        if (password === process.env.PASSWORD) {
-            // Render the EJS template with the provided data
-            const html = await ejs.renderFile(path.join(__dirname, process.env.CONTENT_PATH), { data, images });
-            // Send the rendered HTML as response
-            return res.status(200).send(html);
-        } else {
-            // If password doesn't match, throw an error
-            throw new Error('Invalid Credentials');
-        }
-    } catch (error: any) {
-        // Catch any errors and send an error response
-        return res.status(500).json({ error: error.message });
-    }
-});
-
-// Route for serving images based on ID
-app.get('/image/:id', (req, res) => {
-    // Serve different images based on ID
-    console.log('this funciton is invoked');
-    if (imageDecryption(req.params.id) === 1) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image1.png')}`);
-    } else if (imageDecryption(req.params.id) === 2) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image2.png')}`);
-    } else if (imageDecryption(req.params.id) === 3) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image3.png')}`);
-    } else if (imageDecryption(req.params.id) === 4) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image4.png')}`);
-    } else if (imageDecryption(req.params.id) === 5) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image5.png')}`);
-    } else if (imageDecryption(req.params.id) === 6) {
-        res.sendFile(`${path.join(__dirname, process.env.image_dir_url!, 'image6.png')}`);
-    } else {
-        res.status(404).send('Image not found');
     }
 });
 

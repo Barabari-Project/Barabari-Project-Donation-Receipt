@@ -8,8 +8,8 @@ import fs from 'fs';
 import puppeteer from 'puppeteer';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import imageEncryption from "../utils/imageEncryption.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
+import { PDFDocument } from "pdf-lib";
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -23,53 +23,8 @@ export const sendMail = async (rowData: RowData): Promise<void> => {
     }
 
     try {
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage();
 
-        // Set up request interception
-        await page.setRequestInterception(true);
-
-        const images: Record<string, string> = {};
-
-        for (let i = 1; i <= 6; i++) {
-            images[i.toString()] = `http://localhost:3000/image/${imageEncryption(i)}`;
-        }
-        console.log('we are here');
-
-        const html = await ejs.renderFile(path.join(__dirname, process.env.CONTENT_PATH), { data: rowData, images });
-
-        pdf.create(html).toFile(path.join(__dirname, process.env.PDF_PATH), (err, res) => {
-            if (err) return console.log(err);
-            console.log('PDF generated successfully:', res);
-        });
-
-        // Intercept requests and modify as needed
-        // page.on("request", async interceptedRequest => {
-        //     if (interceptedRequest.url().includes('/abc')) {
-        //         // Intercept the request to '/abc' and continue with custom data
-        //         await interceptedRequest.continue({
-        //             method: "POST",
-        //             postData: JSON.stringify({ data: rowData, password: process.env.PASSWORD, images }),
-        //             headers: { "Content-Type": "application/json" },
-        //         });
-        //     } else {
-        //         // Continue other requests as normal
-        //         await interceptedRequest.continue();
-        //     }
-        // });
-
-        // // Navigate to the endpoint where request will be intercepted
-        // await page.goto(`${process.env.BASE_URI}/abc`, {
-        //     waitUntil: "networkidle2"
-        // });
-
-        // await page.pdf({
-        //     path: path.join(__dirname, process.env.PDF_PATH),
-        //     format: 'A4'
-        // });
-
-        // // Close the browser after navigation
-        // await browser.close();
+        helper(rowData);
 
         // Now, you can send an email after navigating to the endpoint and intercepting the request
         // Create a transporter using Gmail service
@@ -95,8 +50,109 @@ export const sendMail = async (rowData: RowData): Promise<void> => {
         };
 
         // Send email with PDF attachment
-        const info = await transporter.sendMail(mailOptions);
+        // const info = await transporter.sendMail(mailOptions);
     } catch (error) {
         throw error;
     }
 };
+
+async function appendTextToPDF(pdfDoc, contents) {
+    contents.forEach((content) => {
+        pdfDoc.getPages()[content.pageNo]?.drawText(content.text, {
+            x: content.x,
+            y: content.y,
+            size: content.size,
+            bold: content.bold,
+            color: content.color,
+        });
+    });
+    const pdfBytes = await pdfDoc.save();
+    return pdfBytes;
+}
+
+const helper = async (data: RowData) => {
+    const existingPdfBytes = fs.readFileSync(path.join(__dirname, process.env.INPUT_PDF_PATH));
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    const updatedPdfBytes = await appendTextToPDF(pdfDoc, [
+        {
+            text: data["Receipt No"],
+            pageNo: 0,
+            x: 418.44,
+            y: 547.69,
+            size: 12,
+        },
+        {
+            text: data["Today’s Date"],
+            pageNo: 0,
+            x: 430.44,
+            y: 525.69,
+            size: 12,
+        },
+        {
+            text: data["Name"],
+            pageNo: 0,
+            x: 112.44,
+            y: 493,
+            size: 12,
+        },
+        {
+            text: data["Address"],
+            pageNo: 0,
+            x: 125.44,
+            y: 465.69,
+            size: 12,
+        },
+        {
+            text: data["PAN"],
+            pageNo: 0,
+            x: 110.44,
+            y: 439.69,
+            size: 12,
+        },
+        {
+            text: data["Phone number"],
+            pageNo: 0,
+            x: 162.44,
+            y: 412,
+            size: 12,
+        },
+        {
+            text: data["Email"],
+            pageNo: 0,
+            x: 110.44,
+            y: 385.69,
+            size: 12,
+        },
+        {
+            text: data["Amount Received"],
+            pageNo: 0,
+            x: 176,
+            y: 358.69,
+            size: 12,
+        },
+        {
+            text: data["Mode of Payment"],
+            pageNo: 0,
+            x: 177,
+            y: 331.69,
+            size: 12,
+        },
+        {
+            text: data["Check/CC/Reference Number"],
+            pageNo: 0,
+            x: 241,
+            y: 304,
+            size: 12,
+        },
+        {
+            text: data["This donation has gone towards"],
+            pageNo: 0,
+            x: 255,
+            y: 277.69,
+            size: 12,
+        }
+    ]);
+
+    // Write the updated PDF bytes to a new file
+    fs.writeFileSync(path.join(__dirname, process.env.PDF_PATH), updatedPdfBytes);
+}
