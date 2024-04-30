@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import encryptData from '../utils/encryptData';
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, TextField, Button, Box, Typography, CssBaseline } from '@mui/material';
+
 
 const App: React.FC = () => {
   const [starting, setStarting] = useState<number | ''>('');
@@ -42,45 +43,59 @@ const App: React.FC = () => {
 
   return (
     <>
-      {!isLoading ?
-        <div>
-          <label>
-            Starting:
-            <input
+      <CssBaseline />
+      <Box
+        sx={{
+          backgroundColor: '#cad8e5', // Light shade of blue
+          padding: '20px',
+          borderRadius: '10px',
+          textAlign: 'center',
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <Typography variant="h5" gutterBottom sx={{ color: '#333' }}> {/* Dark text color */}
+          Mail Sender
+        </Typography>
+        {!isLoading ? (
+          <Box sx={{ marginTop: '20px' }}>
+            <TextField
+              label="Starting"
               type="number"
               value={starting}
               onChange={(e) => setStarting(parseInt(e.target.value))}
+              fullWidth
+              sx={{ marginBottom: '10px' }}
+              InputProps={{ style: { color: '#333' } }} // Dark text color for input field
             />
-          </label>
-          <br />
-          <label>
-            Ending:
-            <input
+            <TextField
+              label="Ending"
               type="number"
               value={ending}
               onChange={(e) => setEnding(parseInt(e.target.value))}
+              fullWidth
+              sx={{ marginBottom: '10px' }}
+              InputProps={{ style: { color: '#333' } }} // Dark text color for input field
             />
-          </label>
-          <br />
-          <label>
-            Password:
-            <input
+            <TextField
+              label="Password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              fullWidth
+              sx={{ marginBottom: '10px' }}
+              InputProps={{ style: { color: '#333' } }} // Dark text color for input field
             />
-          </label>
-          <br />
-          <button onClick={handleSubmit}>Submit</button>
-        </div> :
-        <div style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%'
-        }}>
-          <CircularProgress />
-        </div>
-      }
+            <Button variant="contained" color="primary" onClick={handleSubmit}>
+              Submit
+            </Button>
+          </Box>
+        ) : (
+          <CircularProgress sx={{ marginTop: '20px' }} />
+        )}
+      </Box>
     </>
   );
 };
