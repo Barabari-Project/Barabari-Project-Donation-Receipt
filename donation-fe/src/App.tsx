@@ -20,11 +20,11 @@ const App: React.FC = () => {
         });
         // Making the Axios call
         const response = await axios.post(import.meta.env.VITE_BACKEND_ENDPOINT as string, { encryptedData: encryptedObj });
-        
+
         // Handle success
-        if( response.status ===200)
+        if (response.status === 200)
           alert('mail was successfully sent');
-        else{
+        else {
           alert('Encounter Error in sending mail please connect to the developer');
         }
       } catch (error) {

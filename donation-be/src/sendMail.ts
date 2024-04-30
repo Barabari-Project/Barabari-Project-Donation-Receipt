@@ -14,13 +14,6 @@ import { PDFDocument } from "pdf-lib";
 dotenv.config(); // Load environment variables from .env file
 
 export const sendMail = async (rowData: RowData): Promise<void> => {
-    // Extract email ID from row data
-    const mailId: string = rowData.Email;
-
-    // Ensure email ID is present
-    if (!mailId) {
-        throw new Error("Email ID is not provided in row data");
-    }
 
     try {
 
@@ -39,18 +32,18 @@ export const sendMail = async (rowData: RowData): Promise<void> => {
         // Update the mailOptions object with the PDF attachment
         const mailOptions: SendMailOptions = {
             from: process.env.EMAIL_USER!,
-            to: mailId,
+            to: rowData.Email,
             subject: "Invoice",
             html: `Hey ${rowData.Name}, Please find the invoice attached.`,
             attachments: [{
                 filename: "invoice.pdf",
-                path: path.join(__dirname, process.env.PDF_PATH),
+                path: path.join(__dirname, process.env.OUTPUT_PDF_PATH),
                 contentType: 'application/pdf'
             }]
         };
 
         // Send email with PDF attachment
-        // const info = await transporter.sendMail(mailOptions);
+        const info = await transporter.sendMail(mailOptions);
     } catch (error) {
         throw error;
     }
@@ -154,5 +147,5 @@ const helper = async (data: RowData) => {
     ]);
 
     // Write the updated PDF bytes to a new file
-    fs.writeFileSync(path.join(__dirname, process.env.PDF_PATH), updatedPdfBytes);
+    fs.writeFileSync(path.join(__dirname, process.env.OUTPUT_PDF_PATH), updatedPdfBytes);
 }

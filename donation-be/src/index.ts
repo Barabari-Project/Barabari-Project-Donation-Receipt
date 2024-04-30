@@ -14,7 +14,20 @@ import { readDataAndSendMail } from './readDataAndSendMail.js';
 dotenv.config(); // Load environment variables from .env file
 
 // Check if all required environment variables are present
-const requiredEnvVariables = ['PORT', 'RESPONSES_SHEET_ID', 'EMAIL_USER', 'EMAIL_PASS', 'ENV', 'CRYPTO_SECRET_KEY', 'PASSWORD', 'BASE_URI', 'FRONTEND_BASE_URI', 'client_email', 'service_cred'];
+const requiredEnvVariables = [
+    'PORT',
+    'RESPONSES_SHEET_ID',
+    'EMAIL_USER',
+    'EMAIL_PASS',
+    'ENV',
+    'CRYPTO_SECRET_KEY',
+    'PASSWORD',
+    'FRONTEND_BASE_URI',
+    'CLIENT_EMAIL',
+    'OUTPUT_PDF_PATH',
+    'INPUT_PDF_PATH',
+    'SERVICE_CRED'
+];
 
 const missingEnvVariables = requiredEnvVariables.filter(variable => !process.env[variable]);
 if (missingEnvVariables.length > 0) {

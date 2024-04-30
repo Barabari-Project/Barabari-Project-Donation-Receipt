@@ -7,6 +7,8 @@ import { sendMail } from './sendMail.js'; // Import the sendMail function
 import { RowData } from './interfaces.js'; // Import the RowData interface
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
+import { validateRow } from '../utils/validateRowData.js';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 dotenv.config(); // Load environment variables from .env file
@@ -15,10 +17,10 @@ dotenv.config(); // Load environment variables from .env file
 const RESPONSES_SHEET_ID: string = process.env.RESPONSES_SHEET_ID!;
 
 // Credentials for the service account
-const CREDENTIALS: { private_key: string } = JSON.parse(fs.readFileSync(`${path.join(__dirname,process.env.service_cred!)}`, 'utf8'));
+const CREDENTIALS: { private_key: string } = JSON.parse(fs.readFileSync(`${path.join(__dirname, process.env.SERVICE_CRED!)}`, 'utf8'));
 
 const serviceAccountAuth = new JWT({
-    email: process.env.client_email,
+    email: process.env.CLIENT_EMAIL,
     key: CREDENTIALS.private_key,
     scopes: [
         'https://www.googleapis.com/auth/spreadsheets',
@@ -60,6 +62,7 @@ export const readDataAndSendMail = async (startingRowNo: number, endingRowNo: nu
                     "Check/CC/Reference Number": row.get('Check/CC/Reference Number'),
                     "This donation has gone towards": row.get('This donation has gone towards')
                 };
+                validateRow(data, index + 2);
                 // Call sendMail function with row data
                 await sendMail(data);
             }
