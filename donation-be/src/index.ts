@@ -64,7 +64,7 @@ app.post('/', async (req: Request, res: Response, next: NextFunction) => {
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-    res.status(500).send(err.message);
+    res.status(400).send(err.message);
 });
 
 // Start the server

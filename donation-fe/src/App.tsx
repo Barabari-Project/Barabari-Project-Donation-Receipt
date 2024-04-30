@@ -28,8 +28,12 @@ const App: React.FC = () => {
         else {
           alert('Encounter Error in sending mail please connect to the developer');
         }
-      } catch (error) {
-        alert('internal Server Error');
+      } catch (error: any) {
+        if (error.response && error.response.data) {
+          alert(error.response.data);
+        } else {
+          alert('Internal Server Error');
+        }
         // Handle error
         console.error('Error:', error);
         // console.error(error!.message);
