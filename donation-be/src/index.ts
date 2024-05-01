@@ -2,11 +2,6 @@ import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
-import { RowData } from './interfaces.js';
-import ejs from 'ejs';
-import { fileURLToPath } from 'url';
-import path, { dirname } from 'path';
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 import decryptData from '../utils/decryptData.js';
 import { readDataAndSendMail } from './readDataAndSendMail.js';
@@ -58,7 +53,7 @@ app.post('/', async (req: Request, res: Response, next: NextFunction) => {
             next(error); // Pass the error to the error handling middleware
         }
     } else {
-        throw new Error('Invalid Credentials');
+        res.status(401).send('Invalid Credentials');
     }
 });
 

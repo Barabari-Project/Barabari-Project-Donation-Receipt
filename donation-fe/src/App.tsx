@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import encryptData from '../utils/encryptData';
 import { CircularProgress, TextField, Button, Box, Typography, CssBaseline, AppBar, Toolbar, Container } from '@mui/material';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import logo from './barabari_logo.png';
 
 const App: React.FC = () => {
   const [starting, setStarting] = useState<number | ''>('');
-  console.log(starting);
   const [ending, setEnding] = useState<number | ''>('');
   const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -24,25 +25,25 @@ const App: React.FC = () => {
         const response = await axios.post(import.meta.env.VITE_BACKEND_ENDPOINT as string, { encryptedData: encryptedObj });
 
         // Handle success
-        if (response.status === 200)
-          alert('Congratulations! The recipes have been sent successfully.');
+        if (response.status === 200) {
+          toast.success('Congratulations! The recipes have been sent successfully.');
+        }
         else {
-          alert('Encounter Error in sending mail please connect to the developer');
+          toast.error('Encounter Error in sending mail please connect to the developer'); // error
         }
       } catch (error: any) {
         if (error.response && error.response.data) {
-          alert(error.response.data);
+          toast.error(error.response.data); // error
         } else {
-          alert('Internal Server Error');
+          toast.error('Internal Server Error'); // error
         }
         // Handle error
         console.error('Error:', error);
-        // console.error(error!.message);
       } finally {
         setIsLoading(false);
       }
     } else {
-      alert('Please make sure starting and ending are valid numbers and starting is smaller than ending, and password field is not empty.');
+      toast.error('Please ensure that the starting and ending rows are valid numbers, the starting row is less than the ending row, and the password field is not empty.');
     }
   };
 
@@ -52,16 +53,23 @@ const App: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: '#cad8e5',
+        // backgroundColor: '#cad8e5',
+        backgroundColor: '#1976d2'
       }}>
+      <ToastContainer />
       <CssBaseline />
       <AppBar position="static" sx={{ backgroundColor: '#333' }}>
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ textAlign: 'center', width: '100%' }}>
-            Barabari Recipe Generator
+          {/* Logo */}
+          <img src={logo} alt="Logo" style={{ height: '40px', marginRight: '10px' }} />
+
+          {/* Title */}
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: 'center' }}>
+            Raksha x Barabari Donation Receipt Generator
           </Typography>
         </Toolbar>
       </AppBar>
+
       {!isLoading ?
         <Container maxWidth="sm" sx={{
           flex: '1',
@@ -69,6 +77,7 @@ const App: React.FC = () => {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
+          marginTop: '-150px'
         }}>
           <Box
             sx={{
@@ -85,7 +94,7 @@ const App: React.FC = () => {
                 label="Starting Row"
                 type="number"
                 value={starting}
-                onChange={(e) => !Number.isNaN(parseInt(e.target.value)) && setStarting(parseInt(e.target.value))}
+                onChange={(e) => setStarting(parseInt(e.target.value))}
                 fullWidth
                 sx={{ marginBottom: '10px' }}
                 InputProps={{ style: { color: '#333' } }} // Dark text color for input field
@@ -94,7 +103,7 @@ const App: React.FC = () => {
                 label="Ending Row"
                 type="number"
                 value={ending}
-                onChange={(e) => !Number.isNaN(parseInt(e.target.value)) && setEnding(parseInt(e.target.value))}
+                onChange={(e) => setEnding(parseInt(e.target.value))}
                 fullWidth
                 sx={{ marginBottom: '10px' }}
                 InputProps={{ style: { color: '#333' } }} // Dark text color for input field
@@ -115,7 +124,10 @@ const App: React.FC = () => {
           </Box>
         </Container>
         : (
-          <CircularProgress sx={{ marginTop: '20px', position: 'absolute', top: '50%', left: '50%' }} />
+          // <CircularProgress color='warning' sx={{ marginTop: '20px', position: 'absolute', top: '50%', left: '50%'}} />
+          <div style={{color:'white'}}>
+            <CircularProgress color='inherit' sx={{ marginTop: '20px', position: 'absolute', top: '35%', left: '50%' }} />
+          </div>
         )}
       <Box
         component="footer"
@@ -130,10 +142,15 @@ const App: React.FC = () => {
         }}
       >
         <Typography variant="body2" sx={{ lineHeight: '1.5' }}>
-          © {new Date().getFullYear()} Built by Barabari Developer.
+          © {new Date().getFullYear()} Barabari Collective Developers.
           <br />
-          Want to build something for you?
-          <a href="#" color="inherit" style={{ marginLeft: '5px' }}>
+          Built By
+          <a href="https://github.com/drumil32" target='_blank' color="inherit" style={{ marginLeft: '5px', color: 'yellow' }}>
+            Drumil Akhenia.
+          </a>
+          <br />
+          Want us to build something for you?
+          <a href="https://www.barabariproject.org/" target='_blank' color="inherit" style={{ marginLeft: '5px', color: 'yellow' }}>
             Contact us
           </a>
         </Typography>
