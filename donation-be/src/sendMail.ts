@@ -1,19 +1,60 @@
 import { createTransport, SendMailOptions, Transporter } from "nodemailer";
 import { RowData } from "./interfaces.js";
-import ejs from 'ejs';
 import dotenv from 'dotenv';
 import path from 'path';
-import pdf from 'html-pdf';
 import fs from 'fs';
-import puppeteer from 'puppeteer';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 import { PDFDocument } from "pdf-lib";
+import { ToWords } from 'to-words';
 
 dotenv.config(); // Load environment variables from .env file
 
+const toWords = new ToWords({
+    localeCode: 'en-IN',
+    converterOptions: {
+        currency: true,
+        ignoreDecimal: false,
+        ignoreZeroCurrency: false,
+        doNotAddOnly: false,
+        currencyOptions: {
+            // can be used to override defaults for the selected locale
+            name: 'Rupee',
+            plural: 'Rupees',
+            symbol: '₹',
+            fractionalUnit: {
+                name: 'Paisa',
+                plural: 'Paise',
+                symbol: '',
+            },
+        },
+    },
+});
+
 export const sendMail = async (rowData: RowData): Promise<void> => {
+
+    const toWords = new ToWords({
+        localeCode: 'en-IN',
+        converterOptions: {
+            currency: true,
+            ignoreDecimal: false,
+            ignoreZeroCurrency: false,
+            doNotAddOnly: false,
+            currencyOptions: {
+                // can be used to override defaults for the selected locale
+                name: 'Rupee',
+                plural: 'Rupees',
+                symbol: '₹',
+                fractionalUnit: {
+                    name: 'Paisa',
+                    plural: 'Paise',
+                    symbol: '',
+                },
+            },
+        },
+    });
+
 
     try {
 
@@ -66,82 +107,69 @@ async function appendTextToPDF(pdfDoc, contents) {
 const helper = async (data: RowData) => {
     const existingPdfBytes = fs.readFileSync(path.join(__dirname, process.env.INPUT_PDF_PATH));
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
     const updatedPdfBytes = await appendTextToPDF(pdfDoc, [
         {
             text: data["Receipt No"],
             pageNo: 0,
-            x: 418.44,
-            y: 547.69,
+            x: 428,
+            y: 560,
             size: 12,
         },
         {
             text: data["Today’s Date"],
             pageNo: 0,
-            x: 430.44,
-            y: 525.69,
+            x: 395,
+            y: 539,
             size: 12,
         },
         {
             text: data["Name"],
             pageNo: 0,
             x: 112.44,
-            y: 493,
+            y: 507,
             size: 12,
         },
         {
             text: data["Address"],
             pageNo: 0,
             x: 125.44,
-            y: 465.69,
+            y: 489,
             size: 12,
         },
         {
             text: data["PAN"],
             pageNo: 0,
             x: 110.44,
-            y: 439.69,
+            y: 472,
             size: 12,
         },
         {
-            text: data["Phone number"],
+            text: 'INR ' + parseInt(data["Amount Received"]).toLocaleString('en-IN') + '/- (' + toWords.convert(parseInt(data["Amount Received"])) + ')',
             pageNo: 0,
-            x: 162.44,
-            y: 412,
-            size: 12,
-        },
-        {
-            text: data["Email"],
-            pageNo: 0,
-            x: 110.44,
-            y: 385.69,
-            size: 12,
-        },
-        {
-            text: data["Amount Received"],
-            pageNo: 0,
-            x: 176,
-            y: 358.69,
+            x: 178,
+            y: 454.4,
             size: 12,
         },
         {
             text: data["Mode of Payment"],
             pageNo: 0,
             x: 177,
-            y: 331.69,
+            y: 435,
             size: 12,
         },
         {
             text: data["Check/CC/Reference Number"],
             pageNo: 0,
-            x: 241,
-            y: 304,
+            x: 250,
+            y: 417.5,
             size: 12,
         },
         {
             text: data["This donation has gone towards"],
             pageNo: 0,
-            x: 255,
-            y: 277.69,
+            x: 258,
+            y: 400,
             size: 12,
         }
     ]);

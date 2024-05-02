@@ -25,6 +25,7 @@
     "nodemailer": "^6.9.13",
     "pdf-lib": "^1.17.1",
     "puppeteer": "^22.7.1",
+    "to-words": "^4.0.1",
     "tsx": "^4.7.2"
   },
   "devDependencies": {
