@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import encryptData from '../utils/encryptData';
 import { CircularProgress, TextField, Button, Box, Typography, CssBaseline, AppBar, Toolbar, Container } from '@mui/material';
@@ -11,6 +11,17 @@ const App: React.FC = () => {
   const [ending, setEnding] = useState<number | ''>('');
   const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const awakeServer = async () => {
+      try {
+        await axios.get(import.meta.env.VITE_BACKEND_ENDPOINT as string);
+      } catch (error) {
+        toast.error('Internal Server Error | please contact to developers');
+      }
+    }
+    awakeServer();
+  }, []);
 
   const handleSubmit = async () => {
     if (starting !== '' && ending !== '' && starting > 1 && starting <= ending && password.trim() !== '') {
@@ -125,7 +136,7 @@ const App: React.FC = () => {
         </Container>
         : (
           // <CircularProgress color='warning' sx={{ marginTop: '20px', position: 'absolute', top: '50%', left: '50%'}} />
-          <div style={{color:'white'}}>
+          <div style={{ color: 'white' }}>
             <CircularProgress color='inherit' sx={{ marginTop: '20px', position: 'absolute', top: '35%', left: '50%' }} />
           </div>
         )}

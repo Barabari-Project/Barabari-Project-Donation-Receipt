@@ -43,6 +43,10 @@ app.use(cors({
 // Set up morgan middleware for logging
 app.use(morgan(process.env.ENV!));
 
+app.get('/',async (req: Request, res: Response, next: NextFunction) => {
+    res.status(200).send('Server Is Running');
+});
+
 // Route for handling POST requests
 app.post('/', async (req: Request, res: Response, next: NextFunction) => {
     const { startingRowNo, endingRowNo, password } = decryptData(req.body.encryptedData);
