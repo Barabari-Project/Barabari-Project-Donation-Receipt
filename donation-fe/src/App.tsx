@@ -1,236 +1,385 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import * as XLSX from 'xlsx';
-import encryptData from '../utils/encryptData';
-import { CircularProgress, TextField, Button, Box, Typography, CssBaseline, AppBar, Toolbar, Container } from '@mui/material';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import logo from './barabari_logo.png';
+import React, { useReducer, useState } from "react";
+import axios from "axios";
+// import * as XLSX from 'xlsx';
+// import encryptData from '../utils/encryptData';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import logo from "./barabari_logo.png";
+import styles from "./App.module.scss";
+import Input from "./Comps/Input/Input";
+import { MdEmail } from "react-icons/md";
+import { RiLockPasswordFill } from "react-icons/ri";
+import { MdOutlineAlternateEmail } from "react-icons/md";
+import { LuListStart } from "react-icons/lu";
+import { LuListEnd } from "react-icons/lu";
+import Lottie from "react-lottie-player";
+import loaderAnimation from "./assets/lottie/loaderAnimation.json";
+import classNames from "classnames";
+
+type InputState = {
+  starting: number | "";
+  ending: number | "";
+  email: string;
+  password: string;
+  ccEmail: string;
+  file: File | null;
+  fileName: string;
+};
+
+type ErrorState = {
+  emailError: string;
+  passwordError: string;
+  startingError: string;
+  endingError: string;
+};
+
+type InputAction =
+  | {
+      type: "SET_FIELD";
+      field: keyof InputState;
+      value: string | number | File | null;
+    }
+  | { type: "SET_FILE"; value: File | null; fileName: string }
+  | { type: "CLEAR_INPUTS" };
+
+type ErrorAction =
+  | { type: "SET_ERROR"; field: keyof ErrorState; value: string }
+  | { type: "CLEAR_ERRORS" };
+
+const initialInputState: InputState = {
+  starting: "",
+  ending: "",
+  email: "",
+  password: "",
+  ccEmail: "",
+  file: null,
+  fileName: "",
+};
+
+const initialErrorState: ErrorState = {
+  emailError: "",
+  passwordError: "",
+  startingError: "",
+  endingError: "",
+};
+
+const inputReducer = (state: InputState, action: InputAction): InputState => {
+  switch (action.type) {
+    case "SET_FIELD":
+      return {
+        ...state,
+        [action.field]: action.value,
+      };
+    case "SET_FILE":
+      return {
+        ...state,
+        file: action.value,
+        fileName: action.fileName,
+      };
+    case "CLEAR_INPUTS":
+      return initialInputState;
+    default:
+      return state;
+  }
+};
+
+const errorReducer = (state: ErrorState, action: ErrorAction): ErrorState => {
+  switch (action.type) {
+    case "SET_ERROR":
+      return {
+        ...state,
+        [action.field]: action.value,
+      };
+    case "CLEAR_ERRORS":
+      return initialErrorState;
+    default:
+      return state;
+  }
+};
 
 const App: React.FC = () => {
-  const [starting, setStarting] = useState<number | ''>('');
-  const [ending, setEnding] = useState<number | ''>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [ccEmail, setCcEmail] = useState<string>('');
-  const [file, setFile] = useState<File | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [inputState, dispatchInput] = useReducer(
+    inputReducer,
+    initialInputState
+  );
+  const [errorState, dispatchError] = useReducer(
+    errorReducer,
+    initialErrorState
+  );
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const awakeServer = async () => {
-      try {
-        await axios.get(import.meta.env.VITE_BACKEND_ENDPOINT as string);
-      } catch (error) {
-        toast.error('Internal Server Error | please contact to developers');
-      }
-    }
-    awakeServer();
-  }, []);
+  // useEffect(() => {
+  //   const awakeServer = async () => {
+  //     try {
+  //       await axios.get(import.meta.env.VITE_BACKEND_ENDPOINT as string);
+  //     } catch (error) {
+  //       toast.error("Internal Server Error | please contact to developers");
+  //     }
+  //   };
+  //   awakeServer();
+  // }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.files);
-    console.log(event.target.files?.length);
     if (event.target.files && event.target.files.length > 0) {
-      setFile(event.target.files[0]);
+      const file = event.target.files[0];
+      dispatchInput({ type: "SET_FILE", value: file, fileName: file.name });
     }
   };
+
   const delay = (ms: number) => {
     return new Promise<void>((resolve) => setTimeout(resolve, ms));
   };
 
   const handleSubmit = async () => {
-    if (starting == '' || ending == '' || starting < 1 || starting > ending) {
-      toast.error('Please ensure that the starting and ending rows are valid numbers, the starting row is less than the ending row');
-    } else if (password === '') {
-      toast.error('please provide valid password');
-    } else if (!file) {
-      toast.error('please select a file');
-    } else if (email === '' || ccEmail === '') {
-      toast.error('please provide email and cc email');
-    } else {
-      try {
-        setIsLoading(true);
+    if (isLoading) return;
+    dispatchError({ type: "CLEAR_ERRORS" });
 
-        await delay(5000);
+    if (!inputState.email || !/^\S+@\S+\.\S+$/.test(inputState.email)) {
+      dispatchError({
+        type: "SET_ERROR",
+        field: "emailError",
+        value: "Please provide a valid email address",
+      });
+      return;
+    }
+    if (inputState.password === "") {
+      dispatchError({
+        type: "SET_ERROR",
+        field: "passwordError",
+        value: "Please provide a valid password",
+      });
+      return;
+    }
+    if (
+      inputState.starting === "" ||
+      isNaN(inputState.starting) ||
+      inputState.starting < 1
+    ) {
+      dispatchError({
+        type: "SET_ERROR",
+        field: "startingError",
+        value: "Please provide a valid starting row number",
+      });
+      return;
+    }
+    if (
+      inputState.ending === "" ||
+      isNaN(inputState.ending) ||
+      inputState.ending < 1
+    ) {
+      dispatchError({
+        type: "SET_ERROR",
+        field: "endingError",
+        value: "Please provide a valid ending row number",
+      });
+      return;
+    }
+    if (inputState.starting >= inputState.ending) {
+      dispatchError({
+        type: "SET_ERROR",
+        field: "startingError",
+        value: "Starting row should be less than the ending row",
+      });
+      return;
+    }
+    if (!inputState.file) {
+      toast.error("please select a file");
+      return;
+    }
+    try {
+      setIsLoading(true);
+      await delay(5000);
+      console.log(inputState);
 
-        // Read the Excel file
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        console.log(worksheet);
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-          raw: false,  // This ensures dates are parsed to JS date objects
-          dateNF: 'dd-mm-yyyy',  // Define date format
-        });
+      // Read the Excel file
+      // const data = await file.arrayBuffer();
+      // const workbook = XLSX.read(data, { type: 'array' });
+      // const sheetName = workbook.SheetNames[0];
+      // const worksheet = workbook.Sheets[sheetName];
+      // console.log(worksheet);
+      // const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+      //   raw: false,  // This ensures dates are parsed to JS date objects
+      //   dateNF: 'dd-mm-yyyy',  // Define date format
+      // });
 
-        const encryptedObj = encryptData({
-          startingRowNo: starting,
-          endingRowNo: ending,
-          email,
-          ccEmail,
-          password,
-          fileData: jsonData // Include the Excel data in the payload
-        });
+      // const encryptedObj = encryptData({
+      //   startingRowNo: starting,
+      //   endingRowNo: ending,
+      //   email,
+      //   ccEmail,
+      //   password,
+      //   fileData: jsonData // Include the Excel data in the payload
+      // });
 
-        // console.log(jsonData);
-        // Making the Axios call
-        // const response = await axios.post(import.meta.env.VITE_BACKEND_ENDPOINT as string, { encryptedData: encryptedObj });
+      // console.log(jsonData);
+      // Making the Axios call
+      // const response = await axios.post(import.meta.env.VITE_BACKEND_ENDPOINT as string, { encryptedData: encryptedObj });
 
-        // // Handle success
-        // if (response.status === 200) {
-        //   toast.success('Congratulations! The recipes have been sent successfully.');
-        // }
-        // else {
-        //   toast.error('Encounter Error in sending mail please connect to the developer'); // error
-        // }
-      } catch (error: any) {
+      // // Handle success
+      // if (response.status === 200) {
+      //   toast.success('Congratulations! The recipes have been sent successfully.');
+      // }
+      // else {
+      //   toast.error('Encounter Error in sending mail please connect to the developer'); // error
+      // }
+      dispatchInput({ type: "CLEAR_INPUTS" });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // Specific handling for Axios errors
         if (error.response && error.response.data) {
-          toast.error(error.response.data); // error
+          toast.error(error.response.data);
         } else {
-          toast.error('Internal Server Error'); // error
+          toast.error("Internal Server Error");
         }
-        // Handle error
-        console.error('Error:', error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        // General error handling
+        toast.error("An unexpected error occurred");
       }
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        // backgroundColor: '#cad8e5',
-        backgroundColor: '#1976d2'
-      }}>
-      <ToastContainer />
-      <CssBaseline />
-      <AppBar position="static" sx={{ backgroundColor: '#333' }}>
-        <Toolbar>
-          {/* Logo */}
-          <img src={logo} alt="Logo" style={{ height: '40px', marginRight: '10px' }} />
+    <div className={styles.appContainer}>
+      <div className={styles.appBar}>
+        <img src={logo} alt="Logo" className={styles.logo} />
+        <h1 className={styles.title}>
+          Raksha x Barabari Donation Receipt Generator
+        </h1>
+      </div>
 
-          {/* Title */}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: 'center' }}>
-            Raksha x Barabari Donation Receipt Generator
-          </Typography>
-        </Toolbar>
-      </AppBar>
-
-      {!isLoading ?
-        <Container maxWidth="sm" sx={{
-          flex: '1',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: '-30px'
-        }}>
-          <Box
-            sx={{
-              padding: '20px',
-              borderRadius: '10px',
-              textAlign: 'center',
-              backgroundColor: 'white',
-              marginTop: '20px',
-              boxShadow: '0px 0px 10px 0px rgba(0,0,0,0.75)',
-            }}
-          >
-            <Box sx={{ marginTop: '20px' }}>
-              <TextField
-                label="Email Id"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                fullWidth
-                sx={{ marginBottom: '10px' }}
-                InputProps={{ style: { color: '#333' } }} // Dark text color for input field
-              />
-              <TextField
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                fullWidth
-                sx={{ marginBottom: '10px' }}
-                InputProps={{ style: { color: '#333' } }} // Dark text color for input field
-              />
-              <TextField
-                label="Cc : Email Id"
-                type="email"
-                value={ccEmail}
-                onChange={(e) => setCcEmail(e.target.value)}
-                fullWidth
-                sx={{ marginBottom: '10px' }}
-                InputProps={{ style: { color: '#333' } }} // Dark text color for input field
-              />
-              <TextField
-                label="Starting Row"
-                type="number"
-                value={starting}
-                onChange={(e) => setStarting(parseInt(e.target.value))}
-                fullWidth
-                sx={{ marginBottom: '10px' }}
-                InputProps={{ style: { color: '#333' } }} // Dark text color for input field
-              />
-              <TextField
-                label="Ending Row"
-                type="number"
-                value={ending}
-                onChange={(e) => setEnding(parseInt(e.target.value))}
-                fullWidth
-                sx={{ marginBottom: '10px' }}
-                InputProps={{ style: { color: '#333' } }} // Dark text color for input field
-              />
-              <input
-                type="file"
-                accept=".xlsx, .xls"
-                onChange={handleFileChange}
-                style={{ marginBottom: '10px', width: '100%', padding: '10px 0' }}
-              />
-              <Button variant="contained" color="primary" onClick={handleSubmit}>
-                Submit
-              </Button>
-            </Box>
-          </Box>
-        </Container>
-        : (
-          <div style={{ color: 'white' }}>
-            <CircularProgress color='inherit' sx={{ marginTop: '20px', position: 'absolute', top: '35%', left: '50%' }} />
+      <div className={styles.formContainer}>
+        <div className={styles.formBox}>
+          <Input
+            placeholder="Email Id"
+            type="email"
+            value={inputState.email}
+            onChange={(e) =>
+              dispatchInput({
+                type: "SET_FIELD",
+                field: "email",
+                value: e.target.value,
+              })
+            }
+            errorMessage={errorState.emailError}
+            icon={<MdEmail />}
+          />
+          <Input
+            placeholder="Password"
+            type="password"
+            value={inputState.password}
+            onChange={(e) =>
+              dispatchInput({
+                type: "SET_FIELD",
+                field: "password",
+                value: e.target.value,
+              })
+            }
+            errorMessage={errorState.passwordError}
+            icon={<RiLockPasswordFill />}
+          />
+          <Input
+            placeholder="Cc : Email Id"
+            type="email"
+            value={inputState.ccEmail}
+            onChange={(e) =>
+              dispatchInput({
+                type: "SET_FIELD",
+                field: "ccEmail",
+                value: e.target.value,
+              })
+            }
+            icon={<MdOutlineAlternateEmail />}
+          />
+          <Input
+            placeholder="Starting Row"
+            type="number"
+            value={inputState.starting}
+            onChange={(e) =>
+              dispatchInput({
+                type: "SET_FIELD",
+                field: "starting",
+                value: parseInt(e.target.value),
+              })
+            }
+            errorMessage={errorState.startingError}
+            icon={<LuListStart />}
+          />
+          <Input
+            placeholder="Ending Row"
+            type="number"
+            value={inputState.ending}
+            onChange={(e) =>
+              dispatchInput({
+                type: "SET_FIELD",
+                field: "ending",
+                value: parseInt(e.target.value),
+              })
+            }
+            errorMessage={errorState.endingError}
+            icon={<LuListEnd />}
+          />
+          <div className={styles.fileInputContainer}>
+            {inputState.fileName && (
+              <div className={styles.fileName}>{inputState.fileName}</div>
+            )}
+            <label htmlFor="file">Upload File</label>
+            <input
+              id="file"
+              type="file"
+              accept=".xlsx, .xls"
+              onChange={handleFileChange}
+            />
           </div>
-        )}
-      <Box
-        component="footer"
-        sx={{
-          py: 3,
-          px: 2,
-          backgroundColor: '#333',
-          color: '#fff',
-          textAlign: 'center',
-          mt: 'auto',
-          borderTop: '1px solid #ddd', // Adding a border at the top for separation
-        }}
-      >
-        <Typography variant="body2" sx={{ lineHeight: '1.5' }}>
-          © {new Date().getFullYear()} Barabari Collective Developers.
-          <br />
+          <button
+            className={classNames(
+              styles.submitButton,
+              isLoading && styles.loading
+            )}
+            onClick={handleSubmit}
+          >
+            {isLoading ? (
+              <Lottie
+                animationData={loaderAnimation}
+                style={{ width: 40, height: 20 }}
+                loop
+                play
+              />
+            ) : (
+              "Submit"
+            )}
+          </button>
+        </div>
+      </div>
+      <footer className={styles.footer}>
+        <p>© {new Date().getFullYear()} Barabari Collective Developers.</p>
+        <p>
           Built By
-          <a href="https://github.com/drumil32" target='_blank' color="inherit" style={{ marginLeft: '5px', color: 'yellow' }}>
+          <a
+            href="https://github.com/drumil32"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.footerLink}
+          >
             Drumil Akhenia.
           </a>
-          <br />
+        </p>
+        <p>
           Want us to build something for you?
-          <a href="https://www.barabariproject.org/" target='_blank' color="inherit" style={{ marginLeft: '5px', color: 'yellow' }}>
+          <a
+            href="https://www.barabariproject.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.footerLink}
+          >
             Contact us
           </a>
-        </Typography>
-      </Box>
-
-    </Box>
+        </p>
+      </footer>
+      <ToastContainer />
+    </div>
   );
 };
 
