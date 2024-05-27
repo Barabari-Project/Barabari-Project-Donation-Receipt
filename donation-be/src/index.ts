@@ -2,7 +2,8 @@ import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
-
+import multer from 'multer';
+import * as XLSX from 'xlsx';
 import decryptData from '../utils/decryptData.js';
 import { readDataAndSendMail } from './readDataAndSendMail.js';
 import { ToWords } from 'to-words';
@@ -43,22 +44,29 @@ app.use(cors({
 // Set up morgan middleware for logging
 app.use(morgan(process.env.ENV!));
 
-app.get('/',async (req: Request, res: Response, next: NextFunction) => {
+const upload = multer({ storage: multer.memoryStorage() }); // Use memory storage for multer
+
+app.get('/', async (req: Request, res: Response, next: NextFunction) => {
     res.status(200).send('Server Is Running');
 });
 
-// Route for handling POST requests
-app.post('/', async (req: Request, res: Response, next: NextFunction) => {
-    const { startingRowNo, endingRowNo, password } = decryptData(req.body.encryptedData);
-    if (password == process.env.PASSWORD) {
-        try {
-            await readDataAndSendMail(startingRowNo, endingRowNo);
-            res.status(200).send();
-        } catch (error) {
-            next(error); // Pass the error to the error handling middleware
-        }
-    } else {
-        res.status(401).send('Invalid Credentials');
+// Route for handling POST requests with file upload
+app.post('/', upload.single('file'), async (req: Request, res: Response, next: NextFunction) => {
+    const encryptedData = req.body.encryptedData;
+    const {
+        startingRowNo,
+        endingRowNo,
+        fileData,
+        email,
+        ccEmail,
+        password } = decryptData(encryptedData);
+
+    try {
+        // Your existing logic
+        await readDataAndSendMail(startingRowNo, endingRowNo, fileData,email,ccEmail,password);
+        res.status(200).send();
+    } catch (error) {
+        next(error); // Pass the error to the error handling middleware
     }
 });
 

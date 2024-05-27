@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 import encryptData from '../utils/encryptData';
 import { CircularProgress, TextField, Button, Box, Typography, CssBaseline, AppBar, Toolbar, Container } from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
@@ -9,7 +10,10 @@ import logo from './barabari_logo.png';
 const App: React.FC = () => {
   const [starting, setStarting] = useState<number | ''>('');
   const [ending, setEnding] = useState<number | ''>('');
+  const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [ccEmail, setCcEmail] = useState<string>('');
+  const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -23,25 +27,63 @@ const App: React.FC = () => {
     awakeServer();
   }, []);
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(event.target.files);
+    console.log(event.target.files?.length);
+    if (event.target.files && event.target.files.length > 0) {
+      setFile(event.target.files[0]);
+    }
+  };
+  const delay = (ms: number) => {
+    return new Promise<void>((resolve) => setTimeout(resolve, ms));
+  };
+
   const handleSubmit = async () => {
-    if (starting !== '' && ending !== '' && starting > 1 && starting <= ending && password.trim() !== '') {
+    if (starting == '' || ending == '' || starting < 1 || starting > ending) {
+      toast.error('Please ensure that the starting and ending rows are valid numbers, the starting row is less than the ending row');
+    } else if (password === '') {
+      toast.error('please provide valid password');
+    } else if (!file) {
+      toast.error('please select a file');
+    } else if (email === '' || ccEmail === '') {
+      toast.error('please provide email and cc email');
+    } else {
       try {
         setIsLoading(true);
+
+        await delay(5000);
+
+        // Read the Excel file
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        console.log(worksheet);
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+          raw: false,  // This ensures dates are parsed to JS date objects
+          dateNF: 'dd-mm-yyyy',  // Define date format
+        });
+
         const encryptedObj = encryptData({
           startingRowNo: starting,
           endingRowNo: ending,
-          password: password
+          email,
+          ccEmail,
+          password,
+          fileData: jsonData // Include the Excel data in the payload
         });
-        // Making the Axios call
-        const response = await axios.post(import.meta.env.VITE_BACKEND_ENDPOINT as string, { encryptedData: encryptedObj });
 
-        // Handle success
-        if (response.status === 200) {
-          toast.success('Congratulations! The recipes have been sent successfully.');
-        }
-        else {
-          toast.error('Encounter Error in sending mail please connect to the developer'); // error
-        }
+        // console.log(jsonData);
+        // Making the Axios call
+        // const response = await axios.post(import.meta.env.VITE_BACKEND_ENDPOINT as string, { encryptedData: encryptedObj });
+
+        // // Handle success
+        // if (response.status === 200) {
+        //   toast.success('Congratulations! The recipes have been sent successfully.');
+        // }
+        // else {
+        //   toast.error('Encounter Error in sending mail please connect to the developer'); // error
+        // }
       } catch (error: any) {
         if (error.response && error.response.data) {
           toast.error(error.response.data); // error
@@ -53,8 +95,6 @@ const App: React.FC = () => {
       } finally {
         setIsLoading(false);
       }
-    } else {
-      toast.error('Please ensure that the starting and ending rows are valid numbers, the starting row is less than the ending row, and the password field is not empty.');
     }
   };
 
@@ -88,7 +128,7 @@ const App: React.FC = () => {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          marginTop: '-150px'
+          marginTop: '-30px'
         }}>
           <Box
             sx={{
@@ -101,6 +141,33 @@ const App: React.FC = () => {
             }}
           >
             <Box sx={{ marginTop: '20px' }}>
+              <TextField
+                label="Email Id"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                fullWidth
+                sx={{ marginBottom: '10px' }}
+                InputProps={{ style: { color: '#333' } }} // Dark text color for input field
+              />
+              <TextField
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                fullWidth
+                sx={{ marginBottom: '10px' }}
+                InputProps={{ style: { color: '#333' } }} // Dark text color for input field
+              />
+              <TextField
+                label="Cc : Email Id"
+                type="email"
+                value={ccEmail}
+                onChange={(e) => setCcEmail(e.target.value)}
+                fullWidth
+                sx={{ marginBottom: '10px' }}
+                InputProps={{ style: { color: '#333' } }} // Dark text color for input field
+              />
               <TextField
                 label="Starting Row"
                 type="number"
@@ -119,14 +186,11 @@ const App: React.FC = () => {
                 sx={{ marginBottom: '10px' }}
                 InputProps={{ style: { color: '#333' } }} // Dark text color for input field
               />
-              <TextField
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                fullWidth
-                sx={{ marginBottom: '10px' }}
-                InputProps={{ style: { color: '#333' } }} // Dark text color for input field
+              <input
+                type="file"
+                accept=".xlsx, .xls"
+                onChange={handleFileChange}
+                style={{ marginBottom: '10px', width: '100%', padding: '10px 0' }}
               />
               <Button variant="contained" color="primary" onClick={handleSubmit}>
                 Submit
@@ -135,7 +199,6 @@ const App: React.FC = () => {
           </Box>
         </Container>
         : (
-          // <CircularProgress color='warning' sx={{ marginTop: '20px', position: 'absolute', top: '50%', left: '50%'}} />
           <div style={{ color: 'white' }}>
             <CircularProgress color='inherit' sx={{ marginTop: '20px', position: 'absolute', top: '35%', left: '50%' }} />
           </div>

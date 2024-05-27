@@ -32,29 +32,7 @@ const toWords = new ToWords({
     },
 });
 
-export const sendMail = async (rowData: RowData): Promise<void> => {
-
-    const toWords = new ToWords({
-        localeCode: 'en-IN',
-        converterOptions: {
-            currency: true,
-            ignoreDecimal: false,
-            ignoreZeroCurrency: false,
-            doNotAddOnly: false,
-            currencyOptions: {
-                // can be used to override defaults for the selected locale
-                name: 'Rupee',
-                plural: 'Rupees',
-                symbol: '₹',
-                fractionalUnit: {
-                    name: 'Paisa',
-                    plural: 'Paise',
-                    symbol: '',
-                },
-            },
-        },
-    });
-
+export const sendMail = async (rowData: RowData, email: string, ccEmail: string[], password: string): Promise<void> => {
 
     try {
 
@@ -65,15 +43,16 @@ export const sendMail = async (rowData: RowData): Promise<void> => {
         const transporter: Transporter = createTransport({
             service: 'gmail',
             auth: {
-                user: process.env.EMAIL_USER!, // Use environment variables instead of hardcoding
-                pass: process.env.EMAIL_PASS!, // Use environment variables instead of hardcoding
+                user: email, // Use environment variables instead of hardcoding
+                pass: password, // Use environment variables instead of hardcoding
             },
         });
 
         // Update the mailOptions object with the PDF attachment
         const mailOptions: SendMailOptions = {
-            from: process.env.EMAIL_USER!,
+            from: email,
             to: rowData.Email,
+            cc: ccEmail,
             subject: "Invoice",
             html: `Hey ${rowData.Name}, Please find the invoice attached.`,
             attachments: [{
@@ -110,7 +89,7 @@ const helper = async (data: RowData) => {
 
     const updatedPdfBytes = await appendTextToPDF(pdfDoc, [
         {
-            text: data["Receipt No"],
+            text: data["Receipt No"].toString(),
             pageNo: 0,
             x: 428,
             y: 560,
