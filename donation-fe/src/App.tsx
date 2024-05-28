@@ -248,12 +248,12 @@ const App: React.FC = () => {
         raw: false,  // This ensures dates are parsed to JS date objects
         dateNF: 'dd-mm-yyyy',  // Define date format
       });
-      
-      console.log(jsonData);
+
+      // console.log(jsonData);
       const starting = Number(inputState.starting);
       const ending = Number(inputState.ending);
       const selectedRows = jsonData.slice(starting - 2, ending - 1);
-      console.log(selectedRows);
+      // console.log(selectedRows);
       const encryptedObj = encryptData({
         startingRowNo: starting,
         endingRowNo: ending,
@@ -286,7 +286,7 @@ const App: React.FC = () => {
         // General error handling
         toast.error("An unexpected error occurred");
       }
-      console.error("Error:", error);
+      // console.error("Error:", error);
     } finally {
       setIsLoading(false);
     }

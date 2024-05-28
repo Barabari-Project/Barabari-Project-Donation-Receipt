@@ -69,7 +69,7 @@ const server = app.listen(PORT, () => {
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-    console.error('Uncaught Exception:', err);
+    // console.error('Uncaught Exception:', err);
     // Gracefully close the server and then exit
     server.close(() => {
         process.exit(1);
