@@ -8,19 +8,15 @@ dotenv.config(); // Load environment variables from .env file
 // Function to get and process rows from the spreadsheet and send email
 export const readDataAndSendMail = async (
     startingRowNo: number,
-    endingRowNo: number,
     fileData: RowData[],
     email: string,
     ccEmail: string[],
     password: string): Promise<void> => {
     try {
-        startingRowNo -= 2; // Adjust index to account for header rows
-        endingRowNo -= 2; // Adjust index to account for header rows
 
         // Loop through each row
-        for (let index = startingRowNo; index <= endingRowNo; index++) {
+        for (let index = 0; index < fileData.length; index++) {
             const row = fileData[index];
-            console.log(row);
             if (row) {
                 // Extract necessary data from the row
                 const data: RowData = {
@@ -36,8 +32,8 @@ export const readDataAndSendMail = async (
                     "Check/CC/Reference Number": row['Check/CC/Reference Number'],
                     "This donation has gone towards": row['This donation has gone towards']
                 };
-                validateRow(data, index + 2);
-                await sendMail(data,email,ccEmail,password);
+                validateRow(data, startingRowNo + index);
+                await sendMail(data, email, ccEmail, password);
             }
         }
     } catch (error) {

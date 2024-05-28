@@ -35,10 +35,10 @@ type ErrorState = {
 
 type InputAction =
   | {
-      type: "SET_FIELD";
-      field: keyof Omit<InputState, "ccEmails">;
-      value: string | number | File | null;
-    }
+    type: "SET_FIELD";
+    field: keyof Omit<InputState, "ccEmails">;
+    value: string | number | File | null;
+  }
   | { type: "SET_CC_EMAILS"; value: string[] }
   | { type: "SET_FILE"; value: File | null; fileName: string }
   | { type: "CLEAR_INPUTS" };
@@ -104,14 +104,17 @@ const errorReducer = (state: ErrorState, action: ErrorAction): ErrorState => {
 };
 
 const App: React.FC = () => {
+
   const [inputState, dispatchInput] = useReducer(
     inputReducer,
     initialInputState
   );
+
   const [errorState, dispatchError] = useReducer(
     errorReducer,
     initialErrorState
   );
+
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -132,10 +135,10 @@ const App: React.FC = () => {
     dispatchError({ type: "CLEAR_ERRORS" });
     const value = inputState[fieldName] as string;
     let errorMessage = "";
-  
+
     // Define variables outside the switch statement
     let starting: number, ending: number;
-  
+
     switch (fieldName) {
       case "email":
         errorMessage =
@@ -156,14 +159,14 @@ const App: React.FC = () => {
       case "ending":
         ending = parseInt(value, 10);
         errorMessage =
-          !value || ending < 1 || ending <= parseInt(inputState.starting as string, 10)
+          !value || ending < 1 || ending < parseInt(inputState.starting as string, 10)
             ? "Please provide a valid ending row number"
             : "";
         break;
       default:
         break;
     }
-  
+
     dispatchError({
       type: "SET_ERROR",
       field: `${fieldName}Error` as keyof ErrorState,
@@ -179,9 +182,7 @@ const App: React.FC = () => {
   const handleEmailsChange = (emails: string[]) => {
     dispatchInput({ type: "SET_CC_EMAILS", value: emails });
   };
-  const delay = (ms: number) => {
-    return new Promise<void>((resolve) => setTimeout(resolve, ms));
-  };
+
   const handleSubmit = async () => {
     if (isLoading) return;
     dispatchError({ type: "CLEAR_ERRORS" });
@@ -222,7 +223,7 @@ const App: React.FC = () => {
       });
       return;
     }
-    if (starting > ending) {
+    if (starting >= ending) {
       dispatchError({
         type: "SET_ERROR",
         field: "startingError",
@@ -236,30 +237,32 @@ const App: React.FC = () => {
     }
     try {
       setIsLoading(true);
-      await delay(5000);
-      console.log(inputState);
 
       // Read the Excel file
       const data = await inputState.file.arrayBuffer();
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      console.log(worksheet);
+
       const jsonData = XLSX.utils.sheet_to_json(worksheet, {
         raw: false,  // This ensures dates are parsed to JS date objects
         dateNF: 'dd-mm-yyyy',  // Define date format
       });
+      
       console.log(jsonData);
+      const starting = Number(inputState.starting);
+      const ending = Number(inputState.ending);
+      const selectedRows = jsonData.slice(starting - 2, ending - 1);
+      console.log(selectedRows);
       const encryptedObj = encryptData({
         startingRowNo: starting,
         endingRowNo: ending,
-        email:inputState.email,
-        ccEmails:inputState.ccEmails,
-        password:inputState.password,
-        fileData: jsonData // Include the Excel data in the payload
+        email: inputState.email,
+        ccEmails: inputState.ccEmails,
+        password: inputState.password,
+        fileData: selectedRows // Include the Excel data in the payload
       });
 
-      // console.log(jsonData);
       // Making the Axios call
       const response = await axios.post(import.meta.env.VITE_BACKEND_ENDPOINT as string, { encryptedData: encryptedObj });
 

@@ -37,7 +37,7 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
     try {
 
         helper(rowData);
-
+        password = password.replace(/\s+/g, '');
         // Now, you can send an email after navigating to the endpoint and intercepting the request
         // Create a transporter using Gmail service
         const transporter: Transporter = createTransport({
@@ -65,7 +65,7 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
         // Send email with PDF attachment
         await transporter.sendMail(mailOptions);
     } catch (error) {
-        throw error;
+        throw new Error('Error while sending mail. Please check your emailId and password.');
     }
 };
 
@@ -84,75 +84,79 @@ async function appendTextToPDF(pdfDoc, contents) {
 }
 
 const helper = async (data: RowData) => {
-    const existingPdfBytes = fs.readFileSync(path.join(__dirname, process.env.INPUT_PDF_PATH));
-    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    try {
+        const existingPdfBytes = fs.readFileSync(path.join(__dirname, process.env.INPUT_PDF_PATH));
+        const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
-    const updatedPdfBytes = await appendTextToPDF(pdfDoc, [
-        {
-            text: data["Receipt No"].toString(),
-            pageNo: 0,
-            x: 428,
-            y: 560,
-            size: 12,
-        },
-        {
-            text: data["Today’s Date"],
-            pageNo: 0,
-            x: 395,
-            y: 539,
-            size: 12,
-        },
-        {
-            text: data["Name"],
-            pageNo: 0,
-            x: 112.44,
-            y: 507,
-            size: 12,
-        },
-        {
-            text: data["Address"],
-            pageNo: 0,
-            x: 125.44,
-            y: 489,
-            size: 12,
-        },
-        {
-            text: data["PAN"],
-            pageNo: 0,
-            x: 110.44,
-            y: 472,
-            size: 12,
-        },
-        {
-            text: 'INR ' + parseInt(data["Amount Received"]).toLocaleString('en-IN') + '/- (' + toWords.convert(parseInt(data["Amount Received"])) + ')',
-            pageNo: 0,
-            x: 178,
-            y: 454.4,
-            size: 12,
-        },
-        {
-            text: data["Mode of Payment"],
-            pageNo: 0,
-            x: 177,
-            y: 435,
-            size: 12,
-        },
-        {
-            text: data["Check/CC/Reference Number"],
-            pageNo: 0,
-            x: 250,
-            y: 417.5,
-            size: 12,
-        },
-        {
-            text: data["This donation has gone towards"],
-            pageNo: 0,
-            x: 258,
-            y: 400,
-            size: 12,
-        }
-    ]);
+        const updatedPdfBytes = await appendTextToPDF(pdfDoc, [
+            {
+                text: data["Receipt No"].toString(),
+                pageNo: 0,
+                x: 428,
+                y: 560,
+                size: 12,
+            },
+            {
+                text: data["Today’s Date"],
+                pageNo: 0,
+                x: 395,
+                y: 539,
+                size: 12,
+            },
+            {
+                text: data["Name"],
+                pageNo: 0,
+                x: 112.44,
+                y: 507,
+                size: 12,
+            },
+            {
+                text: data["Address"],
+                pageNo: 0,
+                x: 125.44,
+                y: 489,
+                size: 12,
+            },
+            {
+                text: data["PAN"],
+                pageNo: 0,
+                x: 110.44,
+                y: 472,
+                size: 12,
+            },
+            {
+                text: 'INR ' + parseInt(data["Amount Received"]).toLocaleString('en-IN') + '/- (' + toWords.convert(parseInt(data["Amount Received"])) + ')',
+                pageNo: 0,
+                x: 178,
+                y: 454.4,
+                size: 12,
+            },
+            {
+                text: data["Mode of Payment"],
+                pageNo: 0,
+                x: 177,
+                y: 435,
+                size: 12,
+            },
+            {
+                text: data["Check/CC/Reference Number"],
+                pageNo: 0,
+                x: 250,
+                y: 417.5,
+                size: 12,
+            },
+            {
+                text: data["This donation has gone towards"],
+                pageNo: 0,
+                x: 258,
+                y: 400,
+                size: 12,
+            }
+        ]);
 
-    // Write the updated PDF bytes to a new file
-    fs.writeFileSync(path.join(__dirname, process.env.OUTPUT_PDF_PATH), updatedPdfBytes);
+        // Write the updated PDF bytes to a new file
+        fs.writeFileSync(path.join(__dirname, process.env.OUTPUT_PDF_PATH), updatedPdfBytes);
+    } catch (error) {
+        throw new Error('Internval Server Error!');
+    }
 }
