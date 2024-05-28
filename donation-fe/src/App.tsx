@@ -125,6 +125,51 @@ const App: React.FC = () => {
     awakeServer();
   }, []);
 
+  const handleInputBlur = (fieldName: keyof InputState) => {
+    validateInput(fieldName);
+  };
+  const validateInput = (fieldName: keyof InputState) => {
+    dispatchError({ type: "CLEAR_ERRORS" });
+    const value = inputState[fieldName] as string;
+    let errorMessage = "";
+  
+    // Define variables outside the switch statement
+    let starting: number, ending: number;
+  
+    switch (fieldName) {
+      case "email":
+        errorMessage =
+          value && !/^\S+@\S+\.\S+$/.test(value)
+            ? "Please provide a valid email address"
+            : "";
+        break;
+      case "password":
+        errorMessage = !value ? "Please provide a valid password" : "";
+        break;
+      case "starting":
+        starting = parseInt(value, 10);
+        errorMessage =
+          !value || starting < 1
+            ? "Please provide a valid starting row number"
+            : "";
+        break;
+      case "ending":
+        ending = parseInt(value, 10);
+        errorMessage =
+          !value || ending < 1 || ending <= parseInt(inputState.starting as string, 10)
+            ? "Please provide a valid ending row number"
+            : "";
+        break;
+      default:
+        break;
+    }
+  
+    dispatchError({
+      type: "SET_ERROR",
+      field: `${fieldName}Error` as keyof ErrorState,
+      value: errorMessage,
+    });
+  };
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
@@ -134,11 +179,9 @@ const App: React.FC = () => {
   const handleEmailsChange = (emails: string[]) => {
     dispatchInput({ type: "SET_CC_EMAILS", value: emails });
   };
-
   const delay = (ms: number) => {
     return new Promise<void>((resolve) => setTimeout(resolve, ms));
   };
-
   const handleSubmit = async () => {
     if (isLoading) return;
     dispatchError({ type: "CLEAR_ERRORS" });
@@ -260,6 +303,7 @@ const App: React.FC = () => {
           <Input
             placeholder="Email Id"
             type="email"
+            name="email"
             value={inputState.email}
             onChange={(e) =>
               dispatchInput({
@@ -268,12 +312,14 @@ const App: React.FC = () => {
                 value: e.target.value,
               })
             }
+            onBlur={() => handleInputBlur("email")}
             errorMessage={errorState.emailError}
             icon={<MdEmail />}
           />
           <Input
             placeholder="Password"
             type="password"
+            name="password"
             value={inputState.password}
             onChange={(e) =>
               dispatchInput({
@@ -282,22 +328,10 @@ const App: React.FC = () => {
                 value: e.target.value,
               })
             }
+            onBlur={() => handleInputBlur("password")}
             errorMessage={errorState.passwordError}
             icon={<RiLockPasswordFill />}
           />
-          {/* <Input
-            placeholder="Cc : Email Id"
-            type="email"
-            value={inputState.ccEmail}
-            onChange={(e) =>
-              dispatchInput({
-                type: "SET_FIELD",
-                field: "ccEmail",
-                value: e.target.value,
-              })
-            }
-            icon={<MdOutlineAlternateEmail />}
-          /> */}
           <MultiEmailInput
             ccEmails={inputState.ccEmails}
             onEmailsChange={handleEmailsChange}
@@ -305,6 +339,7 @@ const App: React.FC = () => {
           <Input
             placeholder="Starting Row"
             type="number"
+            name="starting"
             value={inputState.starting}
             onChange={(e) =>
               dispatchInput({
@@ -313,12 +348,14 @@ const App: React.FC = () => {
                 value: parseInt(e.target.value),
               })
             }
+            onBlur={() => handleInputBlur("starting")}
             errorMessage={errorState.startingError}
             icon={<LuListStart />}
           />
           <Input
             placeholder="Ending Row"
             type="number"
+            name="ending"
             value={inputState.ending}
             onChange={(e) =>
               dispatchInput({
@@ -327,6 +364,7 @@ const App: React.FC = () => {
                 value: parseInt(e.target.value),
               })
             }
+            onBlur={() => handleInputBlur("ending")}
             errorMessage={errorState.endingError}
             icon={<LuListEnd />}
           />

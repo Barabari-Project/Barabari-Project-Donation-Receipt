@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./MultiEmailInput.module.scss";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
 type MultiEmailInputProps = {
   ccEmails: string[];
@@ -9,15 +9,16 @@ type MultiEmailInputProps = {
 
 const MultiEmailInput: React.FC<MultiEmailInputProps> = ({ ccEmails, onEmailsChange }) => {
   const [inputValue, setInputValue] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    setErrorMessage("");
     if (event.key === "Enter" || event.key === "Tab" && inputValue) {
       if (validateEmail(inputValue)) {
         onEmailsChange([...ccEmails, inputValue]);
         setInputValue("");
       } else {
-        // Handle invalid email address
-        console.log("Invalid email address");
+        setErrorMessage("CC Email is not valid")
       }
     } else if (event.key === "Backspace" && !inputValue && ccEmails.length) {
       const newEmails = ccEmails.slice(0, -1);
@@ -38,12 +39,13 @@ const MultiEmailInput: React.FC<MultiEmailInputProps> = ({ ccEmails, onEmailsCha
     return /^\S+@\S+\.\S+$/.test(email);
   };
   const handleBlur = () => {
+    setErrorMessage("");
     if (inputValue) {
       if (validateEmail(inputValue)) {
         onEmailsChange([...ccEmails, inputValue]);
         setInputValue("");
       } else {
-        toast.error("CC Email is not valid")
+        setErrorMessage("CC Email is not valid")
       }
     }
   };
@@ -68,6 +70,7 @@ const MultiEmailInput: React.FC<MultiEmailInputProps> = ({ ccEmails, onEmailsCha
           placeholder="Add CC email"
         />
       </div>
+      {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
     </div>
   );
 };
