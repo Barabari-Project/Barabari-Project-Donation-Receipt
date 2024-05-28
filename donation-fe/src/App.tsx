@@ -9,19 +9,19 @@ import styles from "./App.module.scss";
 import Input from "./Comps/Input/Input";
 import { MdEmail } from "react-icons/md";
 import { RiLockPasswordFill } from "react-icons/ri";
-import { MdOutlineAlternateEmail } from "react-icons/md";
 import { LuListStart } from "react-icons/lu";
 import { LuListEnd } from "react-icons/lu";
 import Lottie from "react-lottie-player";
 import loaderAnimation from "./assets/lottie/loaderAnimation.json";
 import classNames from "classnames";
+import MultiEmailInput from "./Comps/MultiEmailInput/MultiEmailInput";
 
 type InputState = {
   starting: number | "";
   ending: number | "";
   email: string;
   password: string;
-  ccEmail: string;
+  ccEmails: string[];
   file: File | null;
   fileName: string;
 };
@@ -36,9 +36,10 @@ type ErrorState = {
 type InputAction =
   | {
       type: "SET_FIELD";
-      field: keyof InputState;
+      field: keyof Omit<InputState, "ccEmails">;
       value: string | number | File | null;
     }
+  | { type: "SET_CC_EMAILS"; value: string[] }
   | { type: "SET_FILE"; value: File | null; fileName: string }
   | { type: "CLEAR_INPUTS" };
 
@@ -51,7 +52,7 @@ const initialInputState: InputState = {
   ending: "",
   email: "",
   password: "",
-  ccEmail: "",
+  ccEmails: [],
   file: null,
   fileName: "",
 };
@@ -69,6 +70,11 @@ const inputReducer = (state: InputState, action: InputAction): InputState => {
       return {
         ...state,
         [action.field]: action.value,
+      };
+    case "SET_CC_EMAILS":
+      return {
+        ...state,
+        ccEmails: action.value,
       };
     case "SET_FILE":
       return {
@@ -125,6 +131,9 @@ const App: React.FC = () => {
       dispatchInput({ type: "SET_FILE", value: file, fileName: file.name });
     }
   };
+  const handleEmailsChange = (emails: string[]) => {
+    dispatchInput({ type: "SET_CC_EMAILS", value: emails });
+  };
 
   const delay = (ms: number) => {
     return new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -134,7 +143,11 @@ const App: React.FC = () => {
     if (isLoading) return;
     dispatchError({ type: "CLEAR_ERRORS" });
 
-    if (!inputState.email || !/^\S+@\S+\.\S+$/.test(inputState.email)) {
+    const isEmailValid = /^\S+@\S+\.\S+$/.test(inputState.email);
+    const starting = parseInt(inputState.starting as string, 10);
+    const ending = parseInt(inputState.ending as string, 10);
+
+    if (!inputState.email || !isEmailValid) {
       dispatchError({
         type: "SET_ERROR",
         field: "emailError",
@@ -142,7 +155,7 @@ const App: React.FC = () => {
       });
       return;
     }
-    if (inputState.password === "") {
+    if (!inputState.password) {
       dispatchError({
         type: "SET_ERROR",
         field: "passwordError",
@@ -150,11 +163,7 @@ const App: React.FC = () => {
       });
       return;
     }
-    if (
-      inputState.starting === "" ||
-      isNaN(inputState.starting) ||
-      inputState.starting < 1
-    ) {
+    if (!starting || starting < 1) {
       dispatchError({
         type: "SET_ERROR",
         field: "startingError",
@@ -162,11 +171,7 @@ const App: React.FC = () => {
       });
       return;
     }
-    if (
-      inputState.ending === "" ||
-      isNaN(inputState.ending) ||
-      inputState.ending < 1
-    ) {
+    if (!ending || ending < 1) {
       dispatchError({
         type: "SET_ERROR",
         field: "endingError",
@@ -174,7 +179,7 @@ const App: React.FC = () => {
       });
       return;
     }
-    if (inputState.starting >= inputState.ending) {
+    if (starting >= ending) {
       dispatchError({
         type: "SET_ERROR",
         field: "startingError",
@@ -183,7 +188,7 @@ const App: React.FC = () => {
       return;
     }
     if (!inputState.file) {
-      toast.error("please select a file");
+      toast.error("Please select a file");
       return;
     }
     try {
@@ -280,7 +285,7 @@ const App: React.FC = () => {
             errorMessage={errorState.passwordError}
             icon={<RiLockPasswordFill />}
           />
-          <Input
+          {/* <Input
             placeholder="Cc : Email Id"
             type="email"
             value={inputState.ccEmail}
@@ -292,7 +297,8 @@ const App: React.FC = () => {
               })
             }
             icon={<MdOutlineAlternateEmail />}
-          />
+          /> */}
+           <MultiEmailInput ccEmails={inputState.ccEmails} onEmailsChange={handleEmailsChange} />
           <Input
             placeholder="Starting Row"
             type="number"
