@@ -298,7 +298,10 @@ const App: React.FC = () => {
             }
             icon={<MdOutlineAlternateEmail />}
           /> */}
-           <MultiEmailInput ccEmails={inputState.ccEmails} onEmailsChange={handleEmailsChange} />
+          <MultiEmailInput
+            ccEmails={inputState.ccEmails}
+            onEmailsChange={handleEmailsChange}
+          />
           <Input
             placeholder="Starting Row"
             type="number"
@@ -384,7 +387,12 @@ const App: React.FC = () => {
           </a>
         </p>
       </footer>
-      <ToastContainer />
+      <ToastContainer
+        autoClose={2000}
+        newestOnTop={true}
+        draggable
+        theme="light"
+      />
     </div>
   );
 };

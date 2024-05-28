@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styles from "./MultiEmailInput.module.scss";
+import { toast } from "react-toastify";
 
 type MultiEmailInputProps = {
   ccEmails: string[];
@@ -36,6 +37,16 @@ const MultiEmailInput: React.FC<MultiEmailInputProps> = ({ ccEmails, onEmailsCha
   const validateEmail = (email: string) => {
     return /^\S+@\S+\.\S+$/.test(email);
   };
+  const handleBlur = () => {
+    if (inputValue) {
+      if (validateEmail(inputValue)) {
+        onEmailsChange([...ccEmails, inputValue]);
+        setInputValue("");
+      } else {
+        toast.error("CC Email is not valid")
+      }
+    }
+  };
 
   return (
     <div className={styles.multiEmailInputContainer}>
@@ -53,6 +64,7 @@ const MultiEmailInput: React.FC<MultiEmailInputProps> = ({ ccEmails, onEmailsCha
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
           placeholder="Add CC email"
         />
       </div>
