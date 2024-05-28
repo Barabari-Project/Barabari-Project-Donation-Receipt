@@ -1,7 +1,6 @@
-import React, { useReducer, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import axios from "axios";
-// import * as XLSX from 'xlsx';
-// import encryptData from '../utils/encryptData';
+import * as XLSX from 'xlsx';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import logo from "./barabari_logo.png";
@@ -15,6 +14,7 @@ import Lottie from "react-lottie-player";
 import loaderAnimation from "./assets/lottie/loaderAnimation.json";
 import classNames from "classnames";
 import MultiEmailInput from "./Comps/MultiEmailInput/MultiEmailInput";
+import encryptData from "../utils/encryptData";
 
 type InputState = {
   starting: number | "";
@@ -114,16 +114,16 @@ const App: React.FC = () => {
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  // useEffect(() => {
-  //   const awakeServer = async () => {
-  //     try {
-  //       await axios.get(import.meta.env.VITE_BACKEND_ENDPOINT as string);
-  //     } catch (error) {
-  //       toast.error("Internal Server Error | please contact to developers");
-  //     }
-  //   };
-  //   awakeServer();
-  // }, []);
+  useEffect(() => {
+    const awakeServer = async () => {
+      try {
+        await axios.get(import.meta.env.VITE_BACKEND_ENDPOINT as string);
+      } catch (error) {
+        toast.error("Internal Server Error | please contact to developers");
+      }
+    };
+    awakeServer();
+  }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -179,7 +179,7 @@ const App: React.FC = () => {
       });
       return;
     }
-    if (starting >= ending) {
+    if (starting > ending) {
       dispatchError({
         type: "SET_ERROR",
         field: "startingError",
@@ -197,36 +197,36 @@ const App: React.FC = () => {
       console.log(inputState);
 
       // Read the Excel file
-      // const data = await file.arrayBuffer();
-      // const workbook = XLSX.read(data, { type: 'array' });
-      // const sheetName = workbook.SheetNames[0];
-      // const worksheet = workbook.Sheets[sheetName];
-      // console.log(worksheet);
-      // const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-      //   raw: false,  // This ensures dates are parsed to JS date objects
-      //   dateNF: 'dd-mm-yyyy',  // Define date format
-      // });
-
-      // const encryptedObj = encryptData({
-      //   startingRowNo: starting,
-      //   endingRowNo: ending,
-      //   email,
-      //   ccEmail,
-      //   password,
-      //   fileData: jsonData // Include the Excel data in the payload
-      // });
+      const data = await inputState.file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      console.log(worksheet);
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+        raw: false,  // This ensures dates are parsed to JS date objects
+        dateNF: 'dd-mm-yyyy',  // Define date format
+      });
+      console.log(jsonData);
+      const encryptedObj = encryptData({
+        startingRowNo: starting,
+        endingRowNo: ending,
+        email:inputState.email,
+        ccEmails:inputState.ccEmails,
+        password:inputState.password,
+        fileData: jsonData // Include the Excel data in the payload
+      });
 
       // console.log(jsonData);
       // Making the Axios call
-      // const response = await axios.post(import.meta.env.VITE_BACKEND_ENDPOINT as string, { encryptedData: encryptedObj });
+      const response = await axios.post(import.meta.env.VITE_BACKEND_ENDPOINT as string, { encryptedData: encryptedObj });
 
       // // Handle success
-      // if (response.status === 200) {
-      //   toast.success('Congratulations! The recipes have been sent successfully.');
-      // }
-      // else {
-      //   toast.error('Encounter Error in sending mail please connect to the developer'); // error
-      // }
+      if (response.status === 200) {
+        toast.success('Congratulations! The recipes have been sent successfully.');
+      }
+      else {
+        toast.error('Encounter Error in sending mail please connect to the developer'); // error
+      }
       dispatchInput({ type: "CLEAR_INPUTS" });
     } catch (error) {
       if (axios.isAxiosError(error)) {

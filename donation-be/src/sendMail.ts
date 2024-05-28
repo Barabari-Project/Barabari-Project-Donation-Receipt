@@ -63,7 +63,7 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
         };
 
         // Send email with PDF attachment
-        const info = await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
     } catch (error) {
         throw error;
     }
