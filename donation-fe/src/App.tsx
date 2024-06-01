@@ -174,9 +174,12 @@ const App: React.FC = () => {
     });
   };
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('we are going to handle file');
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
       dispatchInput({ type: "SET_FILE", value: file, fileName: file.name });
+    }else{
+      console.log('we are here');
     }
   };
   const handleEmailsChange = (emails: string[]) => {
@@ -223,7 +226,7 @@ const App: React.FC = () => {
       });
       return;
     }
-    if (starting >= ending) {
+    if (starting > ending) {
       dispatchError({
         type: "SET_ERROR",
         field: "startingError",
@@ -429,7 +432,7 @@ const App: React.FC = () => {
         </p>
       </footer>
       <ToastContainer
-        autoClose={2000}
+        autoClose={7000}
         newestOnTop={true}
         draggable
         theme="light"

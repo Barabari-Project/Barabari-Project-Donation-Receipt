@@ -30,7 +30,8 @@ export const readDataAndSendMail = async (
                     "Amount Received": row['Amount Received'],
                     "Mode of Payment": row['Mode of Payment'],
                     "Check/CC/Reference Number": row['Check/CC/Reference Number'],
-                    "This donation has gone towards": row['This donation has gone towards']
+                    "This donation has gone towards": row['This donation has gone towards'],
+                    "Message" : row['Message']
                 };
                 validateRow(data, startingRowNo + index);
                 await sendMail(data, email, ccEmail, password);

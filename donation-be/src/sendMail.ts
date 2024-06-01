@@ -54,7 +54,7 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
             to: rowData.Email,
             cc: ccEmail,
             subject: "Invoice",
-            html: `Hey ${rowData.Name}, Please find the invoice attached.`,
+            html: `Hey ${rowData.Name}, ${rowData.Message}.`,
             attachments: [{
                 filename: "invoice.pdf",
                 path: path.join(__dirname, process.env.OUTPUT_PDF_PATH),

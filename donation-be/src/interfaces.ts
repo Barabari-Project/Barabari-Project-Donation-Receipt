@@ -10,4 +10,5 @@ export interface RowData {
     "Mode of Payment": string;
     "Check/CC/Reference Number": string;
     "This donation has gone towards": string;
+    "Message": string;
 }
