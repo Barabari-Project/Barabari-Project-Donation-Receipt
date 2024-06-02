@@ -8,6 +8,7 @@
     text-align: left;
     margin-bottom: 0.5rem;
   }
+
   .inputBar {
     display: flex;
     position: relative;
@@ -19,7 +20,17 @@
       transform: translateY(-50%);
       z-index: 10;
     }
+    .questionMarkIcon {
+      position: absolute;
+      right: 2.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      cursor: pointer;
+    }
+
   }
+
   input {
     position: relative;
     display: flex;
@@ -33,6 +44,7 @@
     border: 1px solid #c3c8cd;
     background: #fff;
     font-size: 1rem;
+
     @media screen and (max-width: 768px) {
       padding: 1.2rem 1rem;
       padding-left: 2.2rem;
@@ -42,6 +54,7 @@
   input:disabled {
     background: #c3c8cd;
   }
+
   .error {
     border: 1px solid red;
   }
@@ -86,7 +99,7 @@
       }
     }
 
-    input[type="checkbox"]:checked + .checkbox-label {
+    input[type="checkbox"]:checked+.checkbox-label {
       background-color: #4e3bc2;
       border-color: #4e3bc2;
     }

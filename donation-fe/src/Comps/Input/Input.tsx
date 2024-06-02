@@ -1,5 +1,7 @@
 import React, { InputHTMLAttributes } from "react";
 import styles from "./Input.module.scss";
+import { FaQuestionCircle } from "react-icons/fa";
+
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -16,16 +18,25 @@ const Input: React.FC<InputProps> = ({ label, errorMessage, icon, onChange, ...p
     <div className={`${styles.appInputContainer} ${props.type || ""}`}>
       {label && <label>{label}</label>}
       <div className={styles.inputBar}>
-        {icon && icon}
+        {icon && <span>{icon}</span>}
         <input {...props} onChange={handleInputChange} className={errorMessage ? styles.error : ""} />
+        {props.type == "password" &&
+          <span className={styles.questionMarkIcon}>
+            <a href="https://drive.google.com/drive/u/0/folders/18V0mD94B4yJtA3GNFiS5VFMy3sHoZaTO">
+              <FaQuestionCircle />
+            </a>
+          </span>
+        }
       </div>
-      {props.type === "checkbox" ? (
-        <label className={styles.checkboxLabel}>
-          <span className={`${styles.checkmark} ${props.checked ? styles.visible : ""}`}>✔</span>
-        </label>
-      ) : null}
+      {
+        props.type === "checkbox" ? (
+          <label className={styles.checkboxLabel}>
+            <span className={`${styles.checkmark} ${props.checked ? styles.visible : ""}`}>✔</span>
+          </label>
+        ) : null
+      }
       {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
-    </div>
+    </div >
   );
 };
 

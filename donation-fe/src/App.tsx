@@ -131,6 +131,7 @@ const App: React.FC = () => {
   const handleInputBlur = (fieldName: keyof InputState) => {
     validateInput(fieldName);
   };
+
   const validateInput = (fieldName: keyof InputState) => {
     dispatchError({ type: "CLEAR_ERRORS" });
     const value = inputState[fieldName] as string;
@@ -173,6 +174,7 @@ const App: React.FC = () => {
       value: errorMessage,
     });
   };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log('we are going to handle file');
     if (event.target.files && event.target.files.length > 0) {
@@ -182,6 +184,7 @@ const App: React.FC = () => {
       console.log('we are here');
     }
   };
+
   const handleEmailsChange = (emails: string[]) => {
     dispatchInput({ type: "SET_CC_EMAILS", value: emails });
   };
