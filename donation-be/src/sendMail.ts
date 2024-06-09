@@ -47,24 +47,70 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
                 pass: password, // Use environment variables instead of hardcoding
             },
         });
-
+        console.log(__dirname);
+        // margin-top:12px;
         // Update the mailOptions object with the PDF attachment
         const mailOptions: SendMailOptions = {
             from: email,
             to: rowData.Email,
             cc: ccEmail,
             subject: "Invoice",
-            html: `Hey ${rowData.Name}, ${rowData.Message}.`,
-            attachments: [{
-                filename: "invoice.pdf",
-                path: path.join(__dirname, process.env.OUTPUT_PDF_PATH),
-                contentType: 'application/pdf'
-            }]
+            html: `
+                Hey ${rowData.Name}, ${rowData.Message}.
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-top: 20px;
+                ">
+                    <h2 style="margin:0px; margin-right: 10px;">Follow:</h2>
+                    <a href="https://www.linkedin.com" style="margin-right: 10px;">
+                        <img src="cid:linkedin" alt="LinkedIn" width="30" height="30" />
+                    </a>
+                    <a href="https://www.twitter.com" style="margin-right: 10px;">
+                        <img src="cid:twitter" alt="Twitter" width="30" height="30"/>
+                    </a>
+                    <a href="https://www.facebook.com" style="margin-right: 10px;">
+                        <img src="cid:facebook" alt="Facebook" width="30" height="30"/>
+                    </a>
+                    <a href="https://www.instagram.com">
+                        <img src="cid:instagram" alt="Instagram" width="30" height="30"/>
+                    </a>
+                </div>
+            `,
+            attachments: [
+                {
+                    filename: "invoice.pdf",
+                    path: path.join(__dirname, process.env.OUTPUT_PDF_PATH),
+                    contentType: 'application/pdf'
+                }, {
+                    filename: "linkedin.png",
+                    path: path.join(__dirname, process.env.LINKEDIN_IMG_PATH),
+                    cid: "linkedin",
+                    contentType: 'image/png'
+                }, {
+                    filename: "twitter.png",
+                    path: path.join(__dirname, process.env.TWITTER_IMG_PATH),
+                    cid: "twitter",
+                    contentType: 'image/png'
+                }, {
+                    filename: "facebook.png",
+                    path: path.join(__dirname, process.env.FACEBOOK_IMG_PATH),
+                    cid: "facebook",
+                    contentType: 'image/png'
+                }, {
+                    filename: "instagram.png",
+                    path: path.join(__dirname, process.env.INSTAGRAM_IMG_PATH),
+                    cid: "instagram",
+                    contentType: 'image/png'
+                }
+            ]
         };
 
         // Send email with PDF attachment
         await transporter.sendMail(mailOptions);
     } catch (error) {
+        console.log(error);
         throw new Error('Error while sending mail. Please check your emailId and password.');
     }
 };

@@ -15,6 +15,8 @@ import loaderAnimation from "./assets/lottie/loaderAnimation.json";
 import classNames from "classnames";
 import MultiEmailInput from "./Comps/MultiEmailInput/MultiEmailInput";
 import encryptData from "../utils/encryptData";
+import linkedIn from "./assets/linkedIn.png";
+import instagram from "./assets/instagram.png"
 
 type InputState = {
   starting: number | "";
@@ -180,7 +182,7 @@ const App: React.FC = () => {
     if (event.target.files && event.target.files.length > 0) {
       const file = event.target.files[0];
       dispatchInput({ type: "SET_FILE", value: file, fileName: file.name });
-    }else{
+    } else {
       console.log('we are here');
     }
   };
