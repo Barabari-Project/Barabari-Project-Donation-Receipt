@@ -15,8 +15,8 @@ import loaderAnimation from "./assets/lottie/loaderAnimation.json";
 import classNames from "classnames";
 import MultiEmailInput from "./Comps/MultiEmailInput/MultiEmailInput";
 import encryptData from "../utils/encryptData";
-import linkedIn from "./assets/linkedIn.png";
-import instagram from "./assets/instagram.png"
+// import linkedIn from "./assets/linkedIn.png";
+// import instagram from "./assets/instagram.png"
 
 type InputState = {
   starting: number | "";
