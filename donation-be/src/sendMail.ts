@@ -47,7 +47,7 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
                 pass: password, // Use environment variables instead of hardcoding
             },
         });
-        console.log(__dirname);
+        // console.log(__dirname);
         // margin-top:12px;
         // Update the mailOptions object with the PDF attachment
         const mailOptions: SendMailOptions = {
@@ -111,7 +111,8 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
         await transporter.sendMail(mailOptions);
     } catch (error) {
         console.log(error);
-        throw new Error('Error while sending mail. Please check your emailId and password.');
+        throw error;
+        // throw new Error('Error while sending mail. Please check your emailId and password.');
     }
 };
 
