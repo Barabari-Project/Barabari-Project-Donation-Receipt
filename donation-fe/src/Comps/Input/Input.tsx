@@ -22,7 +22,7 @@ const Input: React.FC<InputProps> = ({ label, errorMessage, icon, onChange, ...p
         <input {...props} onChange={handleInputChange} className={errorMessage ? styles.error : ""} />
         {props.type == "password" &&
           <span className={styles.questionMarkIcon}>
-            <a href="https://drive.google.com/drive/u/0/folders/18V0mD94B4yJtA3GNFiS5VFMy3sHoZaTO">
+            <a target="_blank" href="https://drive.google.com/drive/u/0/folders/18V0mD94B4yJtA3GNFiS5VFMy3sHoZaTO">
               <FaQuestionCircle />
             </a>
           </span>
