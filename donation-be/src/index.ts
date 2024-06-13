@@ -15,6 +15,10 @@ const requiredEnvVariables = [
     'FRONTEND_BASE_URI',
     'OUTPUT_PDF_PATH',
     'INPUT_PDF_PATH',
+    'LINKEDIN_IMG_PATH',
+    'INSTAGRAM_IMG_PATH',
+    'TWITTER_IMG_PATH',
+    'FACEBOOK_IMG_PATH'
 ];
 
 const missingEnvVariables = requiredEnvVariables.filter(variable => !process.env[variable]);

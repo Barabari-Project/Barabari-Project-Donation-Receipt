@@ -36,7 +36,7 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
 
     try {
 
-        helper(rowData);
+        await helper(rowData);
         password = password.replace(/\s+/g, '');
         // Now, you can send an email after navigating to the endpoint and intercepting the request
         // Create a transporter using Gmail service
@@ -110,9 +110,8 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
         // Send email with PDF attachment
         await transporter.sendMail(mailOptions);
     } catch (error) {
-        console.log(error);
         throw error;
-        // throw new Error('Error while sending mail. Please check your emailId and password.');
+        throw new Error('Error while sending mail. Please check your emailId and password.');
     }
 };
 
