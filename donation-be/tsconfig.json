@@ -9,6 +9,5 @@
   },
   "include": [
     "src/**/*",
-    "service_cred.json"
   ]
 }
