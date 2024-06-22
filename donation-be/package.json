@@ -5,8 +5,8 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "node ./src/index.ts",
-    "build": "tsc",
+    "dev": "node ./src/index.js",
+    
     "start": "node ./src/index.js"
   },
   "keywords": [],

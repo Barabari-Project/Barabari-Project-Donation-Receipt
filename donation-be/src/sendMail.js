@@ -59,53 +59,34 @@ export const sendMail = async (rowData, email, ccEmail, password) => {
                 ${rowData["Email - Name"]}, 
                 <p>${rowData["Email - Body"]}.</p>
                 <p>${rowData["Email - Sign"]}.</p>
-                <div style="
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-top: 20px;
-                ">
-                    <h2 style="margin:0px; margin-right: 10px;">Follow:</h2>
-                    <a href="https://www.linkedin.com" style="margin-right: 10px;">
-                        <img src="cid:linkedin" alt="LinkedIn" width="30" height="30" />
-                    </a>
-                    <a href="https://www.twitter.com" style="margin-right: 10px;">
-                        <img src="cid:twitter" alt="Twitter" width="30" height="30"/>
-                    </a>
-                    <a href="https://www.facebook.com" style="margin-right: 10px;">
-                        <img src="cid:facebook" alt="Facebook" width="30" height="30"/>
-                    </a>
-                    <a href="https://www.instagram.com">
-                        <img src="cid:instagram" alt="Instagram" width="30" height="30"/>
-                    </a>
-                </div>
             `,
             attachments: [
                 {
                     filename: "invoice.pdf",
                     path: path.join(__dirname, process.env.OUTPUT_PDF_PATH),
                     contentType: 'application/pdf'
-                }, {
-                    filename: "linkedin.png",
-                    path: path.join(__dirname, process.env.LINKEDIN_IMG_PATH),
-                    cid: "linkedin",
-                    contentType: 'image/png'
-                }, {
-                    filename: "twitter.png",
-                    path: path.join(__dirname, process.env.TWITTER_IMG_PATH),
-                    cid: "twitter",
-                    contentType: 'image/png'
-                }, {
-                    filename: "facebook.png",
-                    path: path.join(__dirname, process.env.FACEBOOK_IMG_PATH),
-                    cid: "facebook",
-                    contentType: 'image/png'
-                }, {
-                    filename: "instagram.png",
-                    path: path.join(__dirname, process.env.INSTAGRAM_IMG_PATH),
-                    cid: "instagram",
-                    contentType: 'image/png'
                 }
+                // , {
+                //     filename: "linkedin.png",
+                //     path: path.join(__dirname, process.env.LINKEDIN_IMG_PATH),
+                //     cid: "linkedin",
+                //     contentType: 'image/png'
+                // }, {
+                //     filename: "twitter.png",
+                //     path: path.join(__dirname, process.env.TWITTER_IMG_PATH),
+                //     cid: "twitter",
+                //     contentType: 'image/png'
+                // }, {
+                //     filename: "facebook.png",
+                //     path: path.join(__dirname, process.env.FACEBOOK_IMG_PATH),
+                //     cid: "facebook",
+                //     contentType: 'image/png'
+                // }, {
+                //     filename: "instagram.png",
+                //     path: path.join(__dirname, process.env.INSTAGRAM_IMG_PATH),
+                //     cid: "instagram",
+                //     contentType: 'image/png'
+                // }
             ]
         };
 
