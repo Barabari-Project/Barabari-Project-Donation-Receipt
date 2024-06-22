@@ -9,7 +9,6 @@ export function validateRow(row: RowData, rowNumber: Number) {
         !row['Name'] ||
         !row['Address'] ||
         !row['PAN'] ||
-        !row['Phone number'] ||
         !row['Email'] ||
         !row['Amount Received'] ||
         !row['Mode of Payment'] ||

@@ -25,14 +25,17 @@ export const readDataAndSendMail = async (
                     "Name": row['Name:'],
                     "Address": row['Address'],
                     "PAN": row['PAN'],
-                    "Phone number": row['Phone number'],
                     "Email": row['Email'], // Assuming 'email' is a column in the sheet
                     "Amount Received": row['Amount Received'],
                     "Mode of Payment": row['Mode of Payment'],
                     "Check/CC/Reference Number": row['Check/CC/Reference Number'],
                     "This donation has gone towards": row['This donation has gone towards'],
-                    "Message" : row['Message']
+                    "Email Subject": row['Email Subject'],
+                    "Email - Name": row['Email - Name'],
+                    "Email - Body": row['Email - Body'],
+                    "Email - Sign": row['Email - Sign']
                 };
+                console.log(data);
                 validateRow(data, startingRowNo + index);
                 await sendMail(data, email, ccEmail, password);
             }

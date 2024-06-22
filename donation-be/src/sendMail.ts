@@ -54,9 +54,11 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
             from: email,
             to: rowData.Email,
             cc: ccEmail,
-            subject: "Invoice",
+            subject: rowData["Email Subject"],
             html: `
-                Hey ${rowData.Name}, ${rowData.Message}.
+                ${rowData["Email - Name"]}, 
+                <p>${rowData["Email - Body"]}.</p>
+                <p>${rowData["Email - Sign"]}.</p>
                 <div style="
                     display: flex;
                     align-items: center;

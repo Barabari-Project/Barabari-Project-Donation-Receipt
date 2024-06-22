@@ -4,11 +4,13 @@ export interface RowData {
     "Name": string;
     "Address": string;
     "PAN": string;
-    "Phone number": string;
     "Email": string;
     "Amount Received": string;
     "Mode of Payment": string;
     "Check/CC/Reference Number": string;
     "This donation has gone towards": string;
-    "Message": string;
+    "Email Subject":string;
+    "Email - Name":string;
+    "Email - Body":string;
+    "Email - Sign":string;
 }
