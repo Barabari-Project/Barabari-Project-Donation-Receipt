@@ -1,7 +1,7 @@
-import { RowData } from '../src/interfaces.js';
+// import { RowData } from '../src/interfaces.js';
 
 // Define a function to validate the row data
-export function validateRow(row: RowData, rowNumber: Number) {
+export function validateRow(row, rowNumber) {
     // Validate each field
     if (
         !row['Receipt No'] ||

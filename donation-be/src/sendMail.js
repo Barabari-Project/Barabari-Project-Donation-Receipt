@@ -1,5 +1,5 @@
-import { createTransport, SendMailOptions, Transporter } from "nodemailer";
-import { RowData } from "./interfaces.js";
+import { createTransport } from "nodemailer";
+// import { RowData } from "./interfaces.js";
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
@@ -32,7 +32,7 @@ const toWords = new ToWords({
     },
 });
 
-export const sendMail = async (rowData: RowData, email: string, ccEmail: string[], password: string): Promise<void> => {
+export const sendMail = async (rowData, email, ccEmail, password) => {
 
     try {
 
@@ -40,7 +40,7 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
         password = password.replace(/\s+/g, '');
         // Now, you can send an email after navigating to the endpoint and intercepting the request
         // Create a transporter using Gmail service
-        const transporter: Transporter = createTransport({
+        const transporter = createTransport({
             service: 'gmail',
             auth: {
                 user: email, // Use environment variables instead of hardcoding
@@ -50,7 +50,7 @@ export const sendMail = async (rowData: RowData, email: string, ccEmail: string[
         // console.log(__dirname);
         // margin-top:12px;
         // Update the mailOptions object with the PDF attachment
-        const mailOptions: SendMailOptions = {
+        const mailOptions = {
             from: email,
             to: rowData.Email,
             cc: ccEmail,
@@ -131,7 +131,7 @@ async function appendTextToPDF(pdfDoc, contents) {
     return pdfBytes;
 }
 
-const helper = async (data: RowData) => {
+const helper = async (data) => {
     try {
         const existingPdfBytes = fs.readFileSync(path.join(__dirname, process.env.INPUT_PDF_PATH));
         const pdfDoc = await PDFDocument.load(existingPdfBytes);

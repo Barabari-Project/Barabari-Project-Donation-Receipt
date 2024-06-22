@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -38,13 +38,13 @@ app.use(cors({
 }));
 
 // Set up morgan middleware for logging
-app.use(morgan(process.env.ENV!));
+app.use(morgan(process.env.ENV));
 
-app.get('/', async (req: Request, res: Response, next: NextFunction) => {
+app.get('/', async (req, res, next) => {
     res.status(200).send('Server Is Running');
 });
 
-app.post('/', async (req: Request, res: Response, next: NextFunction) => {
+app.post('/', async (req, res, next) => {
     const encryptedData = req.body.encryptedData;
     const {
         startingRowNo,
@@ -62,7 +62,7 @@ app.post('/', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // Error handling middleware
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err, req, res, next) => {
     res.status(400).send(err.message);
 });
 

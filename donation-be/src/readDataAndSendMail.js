@@ -1,17 +1,17 @@
 import dotenv from 'dotenv';
 import { sendMail } from './sendMail.js'; // Import the sendMail function
-import { RowData } from './interfaces.js'; // Import the RowData interface
+// import { RowData } from './interfaces.js'; // Import the RowData interface
 import { validateRow } from '../utils/validateRowData.js';
 
 dotenv.config(); // Load environment variables from .env file
 
 // Function to get and process rows from the spreadsheet and send email
 export const readDataAndSendMail = async (
-    startingRowNo: number,
-    fileData: RowData[],
-    email: string,
-    ccEmail: string[],
-    password: string): Promise<void> => {
+    startingRowNo,
+    fileData,
+    email,
+    ccEmail,
+    password) => {
     try {
 
         // Loop through each row
@@ -19,7 +19,7 @@ export const readDataAndSendMail = async (
             const row = fileData[index];
             if (row) {
                 // Extract necessary data from the row
-                const data: RowData = {
+                const data = {
                     "Receipt No": row['Receipt No'], // Assuming 'Receipt No' is a column in the sheet
                     "Today’s Date": row['Today’s Date'],
                     "Name": row['Name:'],
