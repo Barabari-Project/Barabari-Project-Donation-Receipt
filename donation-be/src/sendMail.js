@@ -63,7 +63,7 @@ export const sendMail = async (rowData, email, ccEmail, password) => {
             `,
             attachments: [
                 {
-                    filename: "invoice.pdf",
+                    filename: `${rowData['Receipt No']} ${rowData['Name']} ${rowData['Amount Received']}`,
                     path: path.join(__dirname, process.env.OUTPUT_PDF_PATH),
                     contentType: 'application/pdf'
                 }
