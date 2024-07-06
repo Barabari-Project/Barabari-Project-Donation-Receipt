@@ -13,7 +13,6 @@ export const readDataAndSendMail = async (
     ccEmail,
     password) => {
     try {
-
         // Loop through each row
         for (let index = 0; index < fileData.length; index++) {
             const row = fileData[index];
@@ -35,7 +34,6 @@ export const readDataAndSendMail = async (
                     "Email - Body": row['Email - Body'],
                     "Email - Sign": row['Email - Sign']
                 };
-                console.log(data);
                 validateRow(data, startingRowNo + index);
                 await sendMail(data, email, ccEmail, password);
             }

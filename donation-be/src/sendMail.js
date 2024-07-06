@@ -50,8 +50,9 @@ export const sendMail = async (rowData, email, ccEmail, password) => {
         // console.log(__dirname);
         // margin-top:12px;
         // Update the mailOptions object with the PDF attachment
+        let from = `Raksha Foundation ${email}`
         const mailOptions = {
-            from: email,
+            from: from,
             to: rowData.Email,
             cc: ccEmail,
             subject: rowData["Email Subject"],

@@ -261,6 +261,11 @@ const App: React.FC = () => {
       const starting = Number(inputState.starting);
       const ending = Number(inputState.ending);
       const selectedRows = jsonData.slice(starting - 2, ending - 1);
+      
+      if( selectedRows.length==0 || selectedRows.length!=((ending-starting)+1) ){
+        toast.error('Please Select a valid starting and ending row');
+        return; 
+      }
       // console.log(selectedRows);
       const encryptedObj = encryptData({
         startingRowNo: starting,
@@ -273,7 +278,7 @@ const App: React.FC = () => {
 
       // Making the Axios call
       const response = await axios.post(import.meta.env.VITE_BACKEND_ENDPOINT as string, { encryptedData: encryptedObj });
-
+      console.log(response);
       // // Handle success
       if (response.status === 200) {
         toast.success('Congratulations! The recipes have been sent successfully.');
