@@ -93,8 +93,8 @@ export const sendMail = async (rowData, email, ccEmail, password) => {
         // Send email with PDF attachment
         await transporter.sendMail(mailOptions);
     } catch (error) {
-        throw error;
-        throw new Error('Error while sending mail. Please check your emailId and password.');
+        console.log(error);
+        throw new Error('Error while sending mail. Please connect to your developers.');
     }
 };
 
