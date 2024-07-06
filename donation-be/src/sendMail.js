@@ -6,7 +6,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, StandardFonts } from "pdf-lib";
 import { ToWords } from 'to-words';
 
 dotenv.config(); // Load environment variables from .env file
@@ -35,7 +35,17 @@ const toWords = new ToWords({
 export const sendMail = async (rowData, email, ccEmail, password) => {
 
     try {
+        if (rowData.Address.length > 70) {
+            rowData.RemainingAddress = rowData.Address.substring(70);
+            rowData.Address = rowData.Address.substring(0, 70);
+        }
 
+        rowData['Amount Received'] = 'INR ' + parseInt(rowData["Amount Received"]).toLocaleString('en-IN') + '/- (' + toWords.convert(parseInt(rowData["Amount Received"])) + ')';
+
+        if (rowData['Amount Received'].length > 70) {
+            rowData['Remaining Amount Received'] = rowData['Amount Received'].substring(70);
+            rowData['Amount Received'] = rowData['Amount Received'].substring(0, 70);
+        }
         await helper(rowData);
         password = password.replace(/\s+/g, '');
         // Now, you can send an email after navigating to the endpoint and intercepting the request
@@ -100,14 +110,18 @@ export const sendMail = async (rowData, email, ccEmail, password) => {
 };
 
 async function appendTextToPDF(pdfDoc, contents) {
+    const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     contents.forEach((content) => {
-        pdfDoc.getPages()[content.pageNo]?.drawText(content.text, {
-            x: content.x,
-            y: content.y,
-            size: content.size,
-            bold: content.bold,
-            color: content.color,
-        });
+        if (content) {
+            pdfDoc.getPages()[content.pageNo]?.drawText(content.text, {
+                x: content.x,
+                y: content.y,
+                size: content.size,
+                font: content.bold ? boldFont : regularFont,
+                color: content.color,
+            });
+        }
     });
     const pdfBytes = await pdfDoc.save();
     return pdfBytes;
@@ -117,7 +131,7 @@ const helper = async (data) => {
     try {
         const existingPdfBytes = fs.readFileSync(path.join(__dirname, process.env.INPUT_PDF_PATH));
         const pdfDoc = await PDFDocument.load(existingPdfBytes);
-
+        let addOn = 0;
         const updatedPdfBytes = await appendTextToPDF(pdfDoc, [
             {
                 text: data["Receipt No"].toString(),
@@ -134,52 +148,127 @@ const helper = async (data) => {
                 size: 12,
             },
             {
-                text: data["Name"],
+                text: "Name:",
                 pageNo: 0,
-                x: 112.44,
-                y: 507,
+                x: 75,
+                y: 500,
+                bold: true,
                 size: 12,
             },
             {
+                text: data["Name"],
+                pageNo: 0,
+                x: 118,
+                y: 500,
+                size: 12,
+            },
+            {
+                text: "Address:",
+                pageNo: 0,
+                x: 75,
+                y: 482,
+                bold: true,
+                size: 12,
+            },
+
+            {
                 text: data["Address"],
                 pageNo: 0,
-                x: 125.44,
-                y: 489,
+                x: 130,
+                y: 482,
+                size: 12,
+            },
+            (
+                data['RemainingAddress'] && {
+                    text: data["RemainingAddress"],
+                    pageNo: 0,
+                    x: 130,
+                    y: 482 + (addOn -= 18),
+                    size: 12
+                }
+            ),
+            {
+                text: "PAN:",
+                pageNo: 0,
+                x: 75,
+                y: 464 + addOn,
+                bold: true,
                 size: 12,
             },
             {
                 text: data["PAN"],
                 pageNo: 0,
-                x: 110.44,
-                y: 472,
+                x: 108,
+                y: 464 + addOn,
                 size: 12,
             },
             {
-                text: 'INR ' + parseInt(data["Amount Received"]).toLocaleString('en-IN') + '/- (' + toWords.convert(parseInt(data["Amount Received"])) + ')',
+                text: "Amount Received:",
                 pageNo: 0,
-                x: 178,
-                y: 454.4,
+                x: 75,
+                y: 446 + addOn,
+                bold: true,
+                size: 12,
+            },
+            {
+                text: data['Amount Received'],
+                pageNo: 0,
+                x: 183,
+                y: 446 + addOn,
+                size: 12,
+            },
+            (
+                data['Remaining Amount Received'] && {
+                    text: data["Remaining Amount Received"],
+                    pageNo: 0,
+                    x: 183,
+                    y: 446 + (addOn -= 18),
+                    size: 12
+                }
+            ),
+            {
+                text: "Mode of Payment:",
+                pageNo: 0,
+                x: 75,
+                y: 428 + addOn,
+                bold: true,
                 size: 12,
             },
             {
                 text: data["Mode of Payment"],
                 pageNo: 0,
-                x: 177,
-                y: 435,
+                x: 182,
+                y: 428 + addOn,
+                size: 12,
+            },
+            {
+                text: "Cheque/CC/Reference Number:",
+                pageNo: 0,
+                x: 75,
+                y: 410 + addOn,
+                bold: true,
                 size: 12,
             },
             {
                 text: data["Check/CC/Reference Number"],
                 pageNo: 0,
-                x: 250,
-                y: 417.5,
+                x: 260,
+                y: 410 + addOn,
+                size: 12,
+            },
+            {
+                text: "This donation has gone towards:",
+                pageNo: 0,
+                x: 75,
+                y: 392 + addOn,
+                bold: true,
                 size: 12,
             },
             {
                 text: data["This donation has gone towards"],
                 pageNo: 0,
-                x: 258,
-                y: 400,
+                x: 270,
+                y: 392 + addOn,
                 size: 12,
             }
         ]);
@@ -187,6 +276,7 @@ const helper = async (data) => {
         // Write the updated PDF bytes to a new file
         fs.writeFileSync(path.join(__dirname, process.env.OUTPUT_PDF_PATH), updatedPdfBytes);
     } catch (error) {
+        console.log(error);
         throw new Error('Internval Server Error!');
     }
 }
