@@ -67,9 +67,9 @@ export const sendMail = async (rowData, email, ccEmail, password) => {
             cc: ccEmail,
             subject: rowData["Email Subject"],
             html: `
-                ${rowData["Email - Name"]}, 
-                <p>${rowData["Email - Body"]}.</p>
-                <p>${rowData["Email - Sign"]}.</p>
+                ${rowData["Email - Name"]}
+                <p>${rowData["Email - Body"]}</p>
+                <p>${rowData["Email - Sign"]}</p>
             `,
             attachments: [
                 {
